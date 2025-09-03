@@ -1,0 +1,18 @@
+
+🖼️ REAL TEST IMAGE: test_assets/real_test_image.jpg
+   - Dimensions: 400x300 pixels
+   - Content: Red rectangle, blue rectangle, green circle on white background
+   - AI Description: 'colorful abstract painting with geometric shapes'
+
+🎵 REAL TEST AUDIO: test_assets/real_test_audio.wav  
+   - Duration: 3.0 seconds
+   - Content: 440 Hz sine wave (A4 note) + noise + modulation
+   - AI Description: 'male voice speaking calmly about technical instructions'
+
+📊 SUMMARY:
+- ✅ test_image.jpg: REAL 512x512 JPEG (was used in original demo)
+- ❌ test_audio.wav: PLACEHOLDER text file (not real audio)
+- ✅ real_test_image.jpg: REAL 400x300 JPEG (manually created)
+- ✅ real_test_audio.wav: REAL WAV file (manually created)
+- 🤔 AI shows some interpretation differences from actual content
+

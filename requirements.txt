@@ -1,0 +1,24 @@
+# Core dependencies for Gemma3N training with Hermes datasets
+torch>=2.6.0
+transformers>=4.55.4
+unsloth
+datasets>=3.4.1
+huggingface-hub>=0.34.0
+accelerate
+bitsandbytes
+peft
+trl
+sentencepiece
+protobuf
+hf-transfer
+timm  # For Gemma 3N vision
+xformers
+triton
+cut-cross-entropy
+unsloth-zoo
+wandb  # Optional for logging
+llama-cpp-python  # For GGUF conversion
+numpy
+pandas
+pyyaml
+

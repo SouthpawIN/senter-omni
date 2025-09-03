@@ -204,6 +204,50 @@ The advanced chat interface provides:
 - **Error Handling**: Robust recovery from generation errors
 - **Multimodal Ready**: Image, audio, and video tag support
 
+## 🔍 Embedding & Similarity Search
+
+### Multimodal Embeddings
+```python
+from senter_omni_embedder import SenterOmniEmbedder, MultimodalEmbeddingDatabase
+
+# Initialize embedder
+embedder = SenterOmniEmbedder()
+
+# Generate embeddings for different modalities
+text_embedding = embedder.get_text_embedding("Hello world!")
+image_embedding = embedder.get_image_embedding("path/to/image.jpg")
+audio_embedding = embedder.get_audio_embedding("path/to/audio.wav")
+video_embedding = embedder.get_video_embedding("path/to/video.mp4")
+
+# Create multimodal database
+db = MultimodalEmbeddingDatabase(embedder)
+db.add_content({'text': 'Sample text'}, {'metadata': 'example'})
+db.add_content({'image': 'image.jpg'}, {'type': 'photo'})
+
+# Search for similar content
+results = db.search_similar({'text': 'Similar text query'}, top_k=5)
+```
+
+### Test Embeddings
+```bash
+# Full implementation test (requires GPU/CPU with model)
+python test_embeddings.py
+
+# Simple CPU demo (no model required)
+python simple_embedding_demo.py
+```
+
+**Features:**
+- **Text Embeddings**: From Gemma3N hidden states with mean pooling (4096D)
+- **Image Embeddings**: Using MobileNetV5 vision encoder (2048D)
+- **Audio Embeddings**: Using Gemma3N audio encoder (1536D)
+- **Video Embeddings**: Frame-by-frame processing and averaging
+- **Unified Space**: Optional projection to common embedding dimension (1024D)
+- **Similarity Search**: Cosine similarity with efficient retrieval
+- **Multimodal Database**: Store and search across different content types
+- **Memory Efficient**: 4-bit quantization support for reduced VRAM usage
+- **CPU Demo**: Simple demonstration without model loading requirements
+
 ## 🔌 API Usage
 
 ### Programmatic Interface

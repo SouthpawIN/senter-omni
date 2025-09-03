@@ -1,39 +1,43 @@
 # 🤖 Senter-Omni Suite
 
-**Dual Multimodal AI Models: Chat & Embedding with XML Tag Support**
+**Unified Multimodal AI API: Chat & Embedding with XML Tag Support**
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-## 🎯 Two Powerful Models
+**🎭 Simple, Powerful Interface for Multimodal AI**
 
-### 🤖 Senter-Omni (Chat Model)
-Advanced conversational AI with XML tag support for multimodal interactions.
+Senter-Omni provides a unified API with just **two functions**:
+- `omni.chat()` - llama.cpp-style chat completions with full parameter control
+- `omni.embed()` - XML-based multimodal embeddings across text, images, and audio
 
-### 🔍 Senter-Embed (Embedding Model)
-Comprehensive multimodal embedding system for similarity search across text, images, audio, and video.
+## ✨ Core Features
 
-## ✨ Features
+### 🎭 **Unified API**
+- **`omni.chat()`** - llama.cpp-style chat with full parameter control
+- **`omni.embed()`** - XML-based multimodal embeddings
+- **Smart Device Management** - Automatic GPU/CPU allocation
+- **Memory Optimization** - Efficient resource usage
 
-### Chat Model (Senter-Omni)
-- **🧠 Advanced Reasoning** - Fine-tuned on Hermes-3-Dataset for superior problem-solving
-- **🔧 Function Calling** - Enhanced tool use and API integration capabilities
-- **🆓 Uncensored** - Direct, unrestricted responses without content filters
-- **👁️ Multimodal Ready** - Vision and audio understanding architecture
-- **⚡ Efficient** - LoRA fine-tuning for optimal performance
-- **🎯 XML Tag Support** - Clean role-based conversation formatting
-- **🛑 Stop Token Handling** - Automatic conversation termination
-- **📝 Gemma3N Integration** - Native support for Gemma3N chat format
+### 🤖 **Chat Capabilities**
+- **Full Parameter Control** - max_tokens, temperature, top_p, top_k
+- **Streaming Support** - Real-time token generation
+- **Multimodal Input** - Text, images, and audio with XML tags
+- **Custom Stop Sequences** - Flexible response termination
+- **OpenAI Compatibility** - `create_chat_completion()` style API
 
-### Embedding Model (Senter-Embed)
-- **🔍 Similarity Search** - Find similar content across modalities
-- **📊 Multimodal Embeddings** - Text, image, audio, and video embeddings
-- **🗄️ Database Support** - Persistent storage and retrieval
-- **🔄 Unified Space** - Common embedding dimension for all modalities
-- **⚡ Memory Efficient** - 4-bit quantization support
-- **🎵 Audio Processing** - Speech and music embedding
-- **🎥 Video Processing** - Frame-by-frame analysis
-- **📈 Cosine Similarity** - Efficient similarity computation
+### 🔍 **Embedding & Similarity**
+- **XML Tag Interface** - `<text>`, `<image>`, `<audio>` tags
+- **Cross-Modal Search** - Similarity across different content types
+- **Unified Embeddings** - 1024D common embedding space
+- **Real-time Processing** - Fast embedding generation
+- **Similarity Thresholding** - Filter results by relevance
+
+### 🧬 **Technical Excellence**
+- **Gemma3N Foundation** - State-of-the-art multimodal architecture
+- **Precision Optimization** - Fixed NaN issues with autocast
+- **Memory Efficient** - GPU memory fragmentation resolved
+- **Production Ready** - Robust error handling and fallbacks
 
 ## 🚀 Quick Start
 
@@ -49,414 +53,513 @@ pip install -e ".[multimodal]"
 pip install -e ".[all]"
 ```
 
-### 1. Chat Model - Interactive Mode
+### 🎯 **Two Functions, Endless Possibilities**
+
+```python
+import omni
+
+# 🎭 That's it! Just two functions for everything
+response = omni.chat("Hello!", max_tokens=100, temperature=0.7)
+result = omni.embed("<text>AI</text><image>robot.jpg</image>", operation="similarity")
+```
+
+## 📚 **Complete Examples**
+
+### 🤖 **Chat Examples**
+
+#### **Basic Chat**
+```python
+import omni
+
+# Simple chat
+response = omni.chat("<user>Hello! Tell me about yourself.</user>")
+print(response)
+```
+
+#### **Advanced Parameters (llama.cpp Style)**
+```python
+# Full parameter control like llama.cpp
+response = omni.chat(
+    messages="<user>What is machine learning?</user>",
+    max_tokens=150,        # Maximum response length
+    temperature=0.7,       # Creativity (0.0-2.0)
+    top_p=0.9,            # Nucleus sampling (0.0-1.0)
+    top_k=40,             # Top-k sampling
+    stream=False          # Set to True for streaming
+)
+```
+
+#### **Streaming Chat**
+```python
+# Real-time streaming
+for chunk in omni.chat(
+    "<user>Tell me a story about AI.</user>",
+    max_tokens=200,
+    temperature=0.8,
+    stream=True
+):
+    print(chunk, end="")
+```
+
+#### **Multimodal Chat**
+```python
+# Chat with images and audio
+response = omni.chat("""
+<user>Describe this scene: <image>beach_sunset.jpg</image>
+What do you hear in this audio? <audio>ocean_waves.wav</audio></user>
+""", max_tokens=100)
+```
+
+#### **Custom Stop Sequences**
+```python
+# Control response termination
+response = omni.chat(
+    "<user>Write a haiku about technology.</user>",
+    max_tokens=50,
+    temperature=0.9,
+    stop_sequences=["\\n\\n", "END", "STOP"]
+)
+```
+
+#### **OpenAI Compatibility**
+```python
+# Use familiar OpenAI-style API
+completion = omni.create_chat_completion(
+    messages="<user>What is the future of AI?</user>",
+    max_tokens=100,
+    temperature=0.8
+)
+```
+
+### 🔍 **Embedding Examples**
+
+#### **Single Modality**
+```python
+# Text only
+result = omni.embed("<text>Python programming language</text>")
+print(f"Embedding shape: {result['embeddings']['text_0']['embedding'].shape}")
+
+# Image only
+result = omni.embed("<image>photo.jpg</image>")
+
+# Audio only
+result = omni.embed("<audio>music.wav</audio>")
+```
+
+#### **Multiple Modalities**
+```python
+# Any combination of modalities
+result = omni.embed("""
+<text>Artificial intelligence systems</text>
+<image>robot.jpg</image>
+<audio>speech.wav</audio>
+""")
+
+print(f"Modalities processed: {result['modalities']}")
+print(f"Embeddings generated: {len(result['embeddings'])}")
+```
+
+#### **Cross-Modal Similarity**
+```python
+# Find similarities between different content types
+result = omni.embed("""
+<text>Machine learning algorithms</text>
+<image>neural_network_diagram.jpg</image>
+""", operation="similarity")
+
+# View all similarity pairs
+for pair, score in result['similarities'].items():
+    print(f"{pair}: {score:.3f}")
+```
+
+#### **Filtered Similarity Search**
+```python
+# Only show highly similar results
+result = omni.embed("""
+<text>Geometric patterns and shapes</text>
+<image>abstract_art.jpg</image>
+<audio>electronic_music.wav</audio>
+""",
+operation="similarity",
+similarity_threshold=0.1  # Only show scores > 0.1
+)
+
+print("High similarity pairs:")
+for pair, score in result.get('similarities_filtered', {}).items():
+    print(f"  {pair}: {score:.3f}")
+```
+
+### 🎨 **Real-World Use Cases**
+
+#### **Content Analysis**
+```python
+# Analyze blog post with featured image
+result = omni.embed("""
+<text>This article discusses the latest developments in quantum computing and its potential applications in cryptography.</text>
+<image>quantum_circuit_diagram.png</image>
+""", operation="similarity")
+```
+
+#### **Multimedia Search**
+```python
+# Search for related content across modalities
+query_result = omni.embed("""
+<text>Find content about space exploration</text>
+<image>rocket_launch.jpg</image>
+""", operation="similarity")
+```
+
+#### **Creative Content Generation**
+```python
+# Generate story inspired by image and music
+story_prompt = omni.chat("""
+<user>Write a short story inspired by this image: <image>mystical_forest.jpg</image>
+Set the mood with this background music: <audio>ambient_forest_sounds.wav</audio></user>
+""", max_tokens=300, temperature=0.8)
+```
+
+### 🔧 **Advanced Configuration**
+
+#### **Device Management**
+```python
+# Automatic device selection (recommended)
+import omni  # Uses GPU 0 for chat, GPU 1 for embeddings
+
+# Manual device control
+from omni import get_omni_client
+client = get_omni_client(chat_device="cuda:0", embed_device="cuda:1")
+```
+
+#### **Memory Optimization**
+```python
+# The system automatically handles memory optimization
+# Large models are loaded efficiently with memory management
+# GPU memory fragmentation is automatically resolved
+```
+
+#### **Batch Processing**
+```python
+# Process multiple content pieces
+contents = [
+    "<text>AI ethics</text><image>debate.jpg</image>",
+    "<text>Climate change</text><audio>podcast.wav</audio>",
+    "<text>Space travel</text><image>rocket.jpg</image><audio>launch.wav</audio>"
+]
+
+for content in contents:
+    result = omni.embed(content, operation="embed")
+    print(f"Processed {len(result['embeddings'])} modalities")
+```
+
+## 📖 **API Reference**
+
+### **`omni.chat(messages, **kwargs)`**
+
+Generate chat completions with full parameter control.
+
+**Parameters:**
+- `messages` (str or list): Input messages or XML-formatted content
+- `max_tokens` (int, default=256): Maximum tokens to generate
+- `temperature` (float, default=0.8): Sampling temperature (0.0-2.0)
+- `top_p` (float, default=0.9): Nucleus sampling (0.0-1.0)
+- `top_k` (int, default=50): Top-k sampling
+- `stream` (bool, default=False): Enable streaming responses
+- `stop_sequences` (list, optional): Custom stop sequences
+
+**Returns:** Generated response string (or iterator if streaming)
+
+**Examples:**
+```python
+# Basic usage
+response = omni.chat("<user>Hello!</user>")
+
+# Advanced parameters
+response = omni.chat(
+    "<user>Explain quantum physics.</user>",
+    max_tokens=200,
+    temperature=0.7,
+    top_p=0.95,
+    stream=True
+)
+
+# Multimodal
+response = omni.chat("""
+<user>Describe this image: <image>beach_sunset.jpg</image></user>
+""", max_tokens=100)
+```
+
+### **`omni.embed(input_content, operation="embed", **kwargs)`**
+
+Process multimodal embeddings with XML tags.
+
+**Parameters:**
+- `input_content` (str): XML with `<text>`, `<image>`, `<audio>` tags
+- `operation` (str): "embed", "similarity", or "search"
+- `similarity_threshold` (float, default=0.0): Minimum similarity score
+
+**Returns:** Dictionary with embeddings and similarity results
+
+**XML Tags:**
+- `<text>content</text>` - Text to embed
+- `<image>path.jpg</image>` - Image file path
+- `<audio>path.wav</audio>` - Audio file path
+
+**Examples:**
+```python
+# Single modality
+result = omni.embed("<text>Python programming</text>")
+
+# Multiple modalities
+result = omni.embed("""
+<text>AI systems</text>
+<image>robot.jpg</image>
+<audio>speech.wav</audio>
+""")
+
+# Similarity search
+result = omni.embed("""
+<text>Machine learning</text>
+<image>neural_net.jpg</image>
+""", operation="similarity")
+```
+
+### **Response Format**
+
+**Chat Response:**
+```python
+# Simple string response
+"Hello! I'm Senter-Omni, your multimodal AI assistant..."
+```
+
+**Embedding Response:**
+```python
+{
+    "operation": "similarity",
+    "modalities": ["text", "image", "audio"],
+    "embeddings": {
+        "text_0": {
+            "content": "Machine learning",
+            "embedding": torch.Tensor([...])  # 4096D vector
+        },
+        "image_0": {
+            "content": "neural_net.jpg",
+            "embedding": torch.Tensor([...])  # 2048D vector
+        }
+    },
+    "similarities": {
+        "text_0_vs_image_0": 0.035,
+        "text_0_vs_audio_0": 0.000
+    }
+}
+```
+
+## 🎯 **Interactive Mode**
+
 ```bash
 # Start interactive chat
 senter-omni
 
-# Or use Python API
-python -c "from senter_omni import SenterOmniChat; chat = SenterOmniChat()"
-```
-
-### 2. Embedding Model - Similarity Search
-```bash
-# Start embedding CLI
-senter-embed demo  # Run demo
-senter-embed embed --text "Hello world!"  # Generate embeddings
-senter-embed db add --text "Sample text" --db my_database.pkl  # Add to database
-senter-embed db search --text "Similar text" --db my_database.pkl  # Search database
-
-# Or use Python API
-python -c "
-from senter_embed import SenterEmbedder, MultimodalEmbeddingDatabase
-embedder = SenterEmbedder()
-db = MultimodalEmbeddingDatabase(embedder)
-db.add_content({'text': 'Sample content'})
-results = db.search_similar({'text': 'Similar query'})
-"
-```
-
-### 3. XML Tag Examples
-```bash
-# System prompts
+# Try these XML examples:
 <system>You are a helpful AI assistant.</system>
+<user>Hello!</user>
+<user>I have this image: <image>test_assets/real_test_image.jpg</image> What do you see?</user>
+```
 
-# User messages
+### **Interactive Commands**
+- `help` - Learn about XML tags and commands
+- `history` - View your conversation history
+- `clear` - Start a fresh conversation
+- `quit` - Exit the chat
+
+### **XML Tag Quick Reference**
+
+```bash
+# Chat with system prompts
+<system>You are a helpful AI assistant.</system>
 <user>Hello! Tell me about yourself.</user>
 
-# Assistant responses
-<assistant>I'm Senter-Omni, your AI companion!</assistant>
+# Multimodal chat
+<user>Describe this image: <image>photo.jpg</image></user>
+<user>Analyze this audio: <audio>sound.wav</audio></user>
 
-# Multimodal content
-<user>I have this image: <image>A beautiful sunset</image> What do you see?</user>
+# Embedding with XML tags
+<text>Artificial intelligence content</text>
+<image>ai_diagram.jpg</image>
+<audio>ai_podcast.wav</audio>
 ```
 
 ## 📁 Project Structure
 
 ```
 senter-omni-suite/
-├── senter_omni/              # Chat model package
-│   ├── __init__.py          # Package initialization
-│   ├── core.py              # Main chat functionality
-│   ├── embedder.py         # Lightweight embedding for chat
-│   └── cli.py               # Command-line interface
+├── omni.py                  # 🎭 UNIFIED API (Main Interface)
+├── __init__.py              # Package initialization
+├── senter_omni/             # Chat model package
+│   ├── core.py              # Gemma3N chat functionality
+│   └── cli.py               # Chat CLI interface
 ├── senter_embed/            # Embedding model package
-│   ├── __init__.py          # Package initialization
-│   ├── core.py              # Main embedding functionality
-│   ├── database.py          # Database operations
-│   ├── utils.py             # Utility functions
-│   └── cli.py               # Command-line interface
-├── senter_omni_cli.py       # CLI entry point for chat model
-├── senter_embed_cli.py      # CLI entry point for embedding model
-├── simple_embedding_demo.py # CPU-based demo
-├── advanced_chat.py         # Legacy chat interface
-├── senter_omni_embedder.py  # Legacy embedding interface
-├── models/                  # Model files
-│   └── huggingface/
-│       └── senter-omni-lora/ # LoRA adapter with Gemma3N
-├── scripts/                 # Utility scripts
-├── notebooks/               # Training notebooks
-├── test_assets/             # Test files
+│   ├── core.py              # Multimodal embeddings
+│   ├── database.py          # Similarity database
+│   └── utils.py             # Utility functions
+├── gpu_memory_optimizer.py  # Memory optimization tools
+├── example_usage.py         # Comprehensive examples
+├── models/                  # Model files (Gemma3N + LoRA)
+├── test_assets/             # Test files (images, audio)
 ├── requirements.txt         # Dependencies
-├── setup_package.py         # Package setup
-└── README.md               # This file
+└── README.md                # This documentation
 ```
 
-## 🎯 Model Capabilities
+## ⚙️ **System Requirements**
 
-### Text Understanding
-- Mathematical problem solving
-- Code generation and explanation
-- Logical reasoning and analysis
-- Creative writing and storytelling
-- Technical explanations
+### **Hardware**
+- **GPU**: NVIDIA GPU with 16GB+ VRAM (RTX 3090/4090 recommended)
+- **RAM**: 32GB+ system RAM
+- **Storage**: 50GB+ free space for models
 
-### Function Calling
-- Tool integration patterns
-- API interaction examples
-- Parameter passing and validation
-- Error handling and recovery
+### **Software**
+- **Python**: 3.8+
+- **CUDA**: 12.0+ (for GPU acceleration)
+- **PyTorch**: 2.0+
+- **Transformers**: 4.40+
 
-### Multimodal Architecture
-- **Vision**: Image analysis and description
-- **Audio**: Speech and sound understanding
-- **Combined**: Multi-input reasoning
-
-## 💻 Usage Examples
-
-### Senter-Omni (Chat Model)
+### **Installation**
 ```bash
-# Interactive chat with XML support
-senter-omni
+# Clone repository
+git clone https://github.com/SouthpawIN/senter-omni.git
+cd senter-omni
 
-# API mode with JSON input
-echo '{"messages": [{"role": "user", "content": "Hello!"}]}' | senter-omni --api
+# Install with all dependencies
+pip install -e ".[all]"
 
-# Python API
-from senter_omni import SenterOmniChat
-chat = SenterOmniChat()
-response = chat.generate_streaming(["<user>Hello!</user>"])
+# Or minimal installation
+pip install -e .
 ```
 
-**Chat Commands:**
-- `help` - Show help information and XML examples
-- `clear` - Clear conversation history
-- `history` - View conversation history
-- `video` - Check video support capabilities
-- `quit` - Exit chat
+## 🚀 **Quick Start Examples**
 
-### Senter-Embed (Embedding Model)
-```bash
-# Run demo
-senter-embed demo
-
-# Generate embeddings
-senter-embed embed --text "Hello world!" --output embeddings.json
-
-# Database operations
-senter-embed db add --text "Sample text" --db my_db.pkl
-senter-embed db search --text "Similar query" --db my_db.pkl --top-k 5
-senter-embed db info --db my_db.pkl
-
-# Python API
-from senter_embed import SenterEmbedder, MultimodalEmbeddingDatabase
-embedder = SenterEmbedder()
-db = MultimodalEmbeddingDatabase(embedder)
-```
-
-### XML Tag Usage
-
-**Role-based Conversations:**
-```xml
-<system>You are Senter-Omni, a helpful AI assistant with multimodal capabilities.</system>
-<user>Hello! Can you introduce yourself?</user>
-<assistant>Hi! I'm Senter-Omni, your advanced AI companion...</assistant>
-```
-
-**Plain Text (Auto-converted):**
-```
-Hello! Tell me about yourself.
-```
-→ Automatically treated as `<user>Hello! Tell me about yourself.</user>`
-
-**Multimodal Content:**
-```xml
-<user>
-I have this image: <image>A beautiful sunset over mountains</image>
-What do you see in this scene?
-</user>
-```
-
-### Example Conversations
-
-**Math & Reasoning:**
-```xml
-<user>Solve 15 × 23 + 7</user>
-<!-- Senter-Omni automatically handles stop tokens and formatting -->
-```
-
-**Code Generation:**
-```xml
-<user>Write a Python function to check if a number is prime</user>
-<assistant>Here's an efficient implementation...</assistant>
-```
-
-**Multimodal Analysis:**
-```xml
-<user>
-I have this audio: <audio>Gentle piano music</audio>
-Describe the mood this creates.
-</user>
-```
-
-## 🔧 Technical Details
-
-### Base Model
-- **Architecture**: Gemma3N 4B (Google DeepMind)
-- **Training**: Instruction-tuned with multimodal capabilities
-- **Multimodal**: Vision + Audio + Text support
-- **Chat Format**: Native Gemma3N conversation format
-
-### Fine-tuning
-- **Method**: LoRA (Low-Rank Adaptation)
-- **Rank**: 16
-- **Training Data**: Hermes-3-Dataset conversations
-- **Sources**: Hermes-3-Dataset + Function Calling v1
-- **Special Tokens**: Custom stop token handling
-
-### XML Tag Processing
-- **Role Parsing**: Automatic `<user>`, `<system>`, `<assistant>` detection
-- **Multimodal**: `<image>`, `<audio>`, `<video>` tag support
-- **Format Conversion**: XML → Gemma3N chat template
-- **Stop Tokens**: Automatic `<end_of_turn>` and `<start_of_turn>` handling
-
-### Training Results
-- **Final Loss**: 1.96
-- **Convergence**: Excellent (2.99 → 1.96)
-- **Training Time**: ~5 minutes
-- **Memory Usage**: ~12GB peak
-
-## 📊 Performance
-
-- **Inference Speed**: Fast on modern GPUs
-- **Memory Efficient**: LoRA optimization
-- **Response Quality**: High (Hermes-trained)
-- **Multimodal Ready**: Architecture supports vision/audio
-
-## 🛠️ Requirements
-
-- Python 3.8+
-- PyTorch 2.0+
-- CUDA-compatible GPU (recommended)
-- 8GB+ RAM
-- 16GB+ VRAM (for GPU acceleration)
-
-## 📦 Installation
-
-1. **Clone and setup:**
-```bash
-cd /home/sovthpaw/Desktop/senter-omni
-source venv/bin/activate
-```
-
-2. **Dependencies are pre-installed in the virtual environment**
-
-## 🎮 Interactive Features
-
-The advanced chat interface provides:
-- **XML Tag Support**: Clean role-based conversation formatting
-- **Real-time Streaming**: Token-by-token response generation
-- **Stop Token Handling**: Automatic conversation termination
-- **Conversation History**: Persistent chat context
-- **Command System**: Built-in utilities and help
-- **Error Handling**: Robust recovery from generation errors
-- **Multimodal Ready**: Image, audio, and video tag support
-
-## 🔍 Embedding & Similarity Search
-
-### Multimodal Embeddings
+### **1. Basic Chat**
 ```python
-from senter_omni_embedder import SenterOmniEmbedder, MultimodalEmbeddingDatabase
+import omni
 
-# Initialize embedder
-embedder = SenterOmniEmbedder()
-
-# Generate embeddings for different modalities
-text_embedding = embedder.get_text_embedding("Hello world!")
-image_embedding = embedder.get_image_embedding("path/to/image.jpg")
-audio_embedding = embedder.get_audio_embedding("path/to/audio.wav")
-video_embedding = embedder.get_video_embedding("path/to/video.mp4")
-
-# Create multimodal database
-db = MultimodalEmbeddingDatabase(embedder)
-db.add_content({'text': 'Sample text'}, {'metadata': 'example'})
-db.add_content({'image': 'image.jpg'}, {'type': 'photo'})
-
-# Search for similar content
-results = db.search_similar({'text': 'Similar text query'}, top_k=5)
+response = omni.chat("Hello! Tell me about AI.")
+print(response)
 ```
 
-### Test Embeddings
-```bash
-# Full implementation test (requires GPU/CPU with model)
-python test_embeddings.py
-
-# Simple CPU demo (no model required)
-python simple_embedding_demo.py
-```
-
-**Features:**
-- **Text Embeddings**: From Gemma3N hidden states with mean pooling (4096D)
-- **Image Embeddings**: Using MobileNetV5 vision encoder (2048D)
-- **Audio Embeddings**: Using Gemma3N audio encoder (1536D)
-- **Video Embeddings**: Frame-by-frame processing and averaging
-- **Unified Space**: Optional projection to common embedding dimension (1024D)
-- **Similarity Search**: Cosine similarity with efficient retrieval
-- **Multimodal Database**: Store and search across different content types
-- **Memory Efficient**: 4-bit quantization support for reduced VRAM usage
-- **CPU Demo**: Simple demonstration without model loading requirements
-
-## 🔌 API Usage
-
-### Programmatic Interface
+### **2. Advanced Chat with Parameters**
 ```python
-from advanced_chat import AdvancedSenterOmni
-
-# Initialize the model
-ai = AdvancedSenterOmni()
-
-# Simple text generation
-messages = [{"role": "user", "content": "Hello!"}]
-response = ai.generate_streaming(messages)
-
-# XML tag support
-xml_messages = ["<user>Hello! Tell me about yourself.</user>"]
-response = ai.generate_streaming(xml_messages)
-
-# OpenAI-compatible format
-completion = ai.chat_completion(messages)
+response = omni.chat(
+    "<user>Explain quantum computing.</user>",
+    max_tokens=200,
+    temperature=0.7,
+    stream=True
+)
 ```
 
-### Streaming Responses
+### **3. Multimodal Chat**
 ```python
-# Real-time token streaming
-response = ai.generate_streaming([user_input])
-# Output appears incrementally without stop tokens
+response = omni.chat("""
+<user>Describe this scene: <image>beach.jpg</image>
+What emotions does this music convey? <audio>piano.wav</audio></user>
+""")
 ```
 
-## 🔮 Future Enhancements
+### **4. Embedding & Similarity**
+```python
+result = omni.embed("""
+<text>Machine learning algorithms</text>
+<image>neural_network.jpg</image>
+""", operation="similarity")
 
-- [x] XML tag parsing and role-based conversations
-- [x] Stop token handling for clean output
-- [x] Gemma3N chat template integration
-- [ ] GGUF model conversion for CPU deployment
-- [ ] Full multimodal fine-tuning with images/audio
-- [ ] REST API server deployment
-- [ ] Web interface with real-time chat
-- [ ] Custom dataset integration
-- [ ] Function calling expansion
-- [ ] Multi-turn conversation memory
+print(f"Similarity: {result['similarities']['text_0_vs_image_0']:.3f}")
+```
 
-## 📝 License
+### **5. Cross-Modal Search**
+```python
+# Find related content across modalities
+result = omni.embed("""
+<text>Find content about space exploration</text>
+<image>rocket.jpg</image>
+<audio>launch_sounds.wav</audio>
+""", operation="similarity", similarity_threshold=0.1)
+```
 
-This project combines:
-- **Gemma3N**: Google's model license
-- **Hermes Datasets**: Apache 2.0
-- **Training Code**: MIT License
+## 🎯 **Model Capabilities**
 
-## 🙏 Acknowledgments
+### 🤖 **Advanced AI Features**
+- **Superior Reasoning** - Fine-tuned on Hermes dataset for complex problem-solving
+- **Code Generation** - Multi-language programming support
+- **Mathematical Solving** - Advanced calculation and analysis
+- **Creative Writing** - Stories, poems, and content generation
+- **Technical Analysis** - Deep explanations of complex topics
 
-- **Google** for Gemma3N architecture
-- **Nous Research** for Hermes datasets
-- **Unsloth** for efficient training framework
-- **HuggingFace** for model hosting
+### 🔧 **Function Calling & Tools**
+- **API Integration** - Seamless tool and service connections
+- **Parameter Validation** - Robust input handling and error recovery
+- **Dynamic Responses** - Context-aware output generation
+
+### 🎨 **Multimodal Understanding**
+- **🖼️ Vision Analysis** - Detailed image descriptions and analysis
+- **🎵 Audio Processing** - Speech recognition and sound analysis
+- **🔄 Cross-Modal Reasoning** - Integrated understanding across modalities
+- **📝 XML Interface** - Clean, structured multimodal input
+
+## 📈 **Performance & Quality**
+
+### **Technical Achievements**
+- ✅ **Gemma3N Foundation** - State-of-the-art multimodal architecture
+- ✅ **Precision Optimization** - Fixed NaN issues with autocast
+- ✅ **Memory Efficiency** - GPU memory fragmentation resolved
+- ✅ **Cross-Modal Search** - Unified similarity across 1024D space
+- ✅ **Production Ready** - Robust error handling and fallbacks
+
+### **Quality Metrics**
+- **Chat Accuracy**: Advanced reasoning with XML tag support
+- **Embedding Quality**: 4096D text, 2048D image, 1536D audio vectors
+- **Similarity Precision**: Cross-modal search with configurable thresholds
+- **Memory Usage**: Optimized for RTX 3090/4090 GPUs
+
+## 🏆 **Why Senter-Omni?**
+
+### **🎭 Unified Experience**
+- **Two Functions**: `omni.chat()` and `omni.embed()` for everything
+- **XML Interface**: Consistent tagging across all modalities
+- **Parameter Control**: Full llama.cpp-style generation parameters
+- **Smart Management**: Automatic GPU/CPU allocation
+
+### **🚀 Production Ready**
+- **Stable Performance**: Fixed all precision and memory issues
+- **Comprehensive Testing**: Examples across text, image, and audio
+- **Error Handling**: Graceful fallbacks and recovery
+- **Documentation**: Complete API reference and examples
+
+### **🔬 Research Grade**
+- **Gemma3N Integration**: Latest multimodal architecture
+- **Cross-Modal Understanding**: True multimodal reasoning
+- **Extensible Design**: Easy to add new modalities
+- **Open Source**: Fully transparent and modifiable
+
+## 📞 **Support & Community**
+
+### **Getting Help**
+- **📖 Documentation**: Comprehensive examples and API reference
+- **🐛 Issues**: GitHub issues for bug reports and feature requests
+- **💬 Discussions**: Community forum for questions and ideas
+
+### **Contributing**
+- **🔧 Pull Requests**: Welcome contributions and improvements
+- **📝 Documentation**: Help improve examples and guides
+- **🧪 Testing**: Additional test cases and validation
+
+## 🙏 **Acknowledgments**
+
+- **Google DeepMind** - Gemma3N architecture and models
+- **Unsloth Team** - Optimization insights and fixes
+- **Hugging Face** - Transformers library and model hosting
+- **PyTorch Team** - Deep learning framework
+- **Open Source Community** - Libraries and tools that made this possible
 
 ---
 
-## 🚀 Getting Started
+**🎉 Senter-Omni: Where Simple Meets Powerful**
 
-**Ready to chat with Senter-Omni? Here's how to begin:**
-
-```bash
-# Activate the virtual environment
-source venv/bin/activate
-
-# Start the advanced chat interface
-python advanced_chat.py
-
-# Try these XML examples:
-<system>You are a helpful AI assistant.</system>
-<user>Hello! Tell me about yourself.</user>
-<user>I have this image: <image>A beautiful landscape</image> What do you see?</user>
-```
-
-### Quick Commands
-- `help` - Learn about XML tags and commands
-- `history` - View your conversation history
-- `clear` - Start a fresh conversation
-- `quit` - Exit the chat
-
-## ✅ Fixed Issues
-
-The following issues have been resolved using insights from the Unsloth Gemma3N documentation:
-
-### 🔧 **Vision Tower NaN Fix**
-- **Issue**: Gemma3N vision tower produced NaN values with float16 precision
-- **Solution**: Applied `torch.amp.autocast(dtype=torch.float32)` for Conv2D operations
-- **Result**: ✅ Vision embeddings working perfectly with no NaN values
-
-### 🎵 **Audio Tower Parameter Mapping**
-- **Issue**: Audio tower expected different parameter names than processor provided
-- **Solution**: Mapped processor outputs to correct tower inputs:
-  - `input_features` → `audio_mel`
-  - `input_features_mask` → `audio_mel_mask`
-- **Result**: ✅ Audio embeddings working with proper parameter mapping
-
-### 📐 **Embedding Shape Standardization**
-- **Issue**: Different modalities returned different tensor shapes
-- **Solution**: Proper pooling and dimension handling for all modalities
-- **Result**: ✅ All embeddings returned as proper 1D vectors
-
-### 🔄 **Cross-Modal Similarity**
-- **Issue**: Different embedding dimensions prevented similarity computation
-- **Solution**: Unified projection system to 1024D space for all modalities
-- **Result**: ✅ Cross-modal similarity working across text, image, and audio
-
-### 💾 **Memory Optimization**
-- **Issue**: High memory fragmentation and OOM errors
-- **Solution**: PyTorch memory management configuration and separate GPU loading
-- **Result**: ✅ Efficient memory usage with both models on separate GPUs
-
-## 🚀 **Production Status**
-
-**✅ FULLY FUNCTIONAL MULTIMODAL SYSTEM**
-
-All native Gemma3N components are working without fallbacks:
-- 🤖 **Text Generation**: Working with proper stop token handling
-- 🖼️ **Vision Processing**: NaN-free with autocast precision fix
-- 🎵 **Audio Processing**: Working with correct parameter mapping
-- 🔍 **Embedding Generation**: All modalities with proper shapes
-- 🔄 **Cross-Modal Search**: Unified similarity across different dimensions
-- 💾 **Memory Management**: Optimized for production use
-
-**🎯 Senter-Omni combines the power of Gemma3N with clean XML-based conversations and automatic stop token handling for the ultimate AI chat experience!**
+**Two functions. Endless multimodal possibilities.** 🚀✨

@@ -7,13 +7,15 @@
 
 **🎭 Simple, Powerful Interface for Multimodal AI**
 
-Senter-Omni provides a unified API with just **two functions**:
+Senter-Omni provides a unified API with **three core functions**:
+- `omni.train()` - Train new multimodal chat models from datasets
 - `omni.chat()` - llama.cpp-style chat completions with full parameter control
 - `omni.embed()` - XML-based multimodal embeddings across text, images, and audio
 
 ## ✨ Core Features
 
 ### 🎭 **Unified API**
+- **`omni.train()`** - Train new multimodal chat models from datasets
 - **`omni.chat()`** - llama.cpp-style chat with full parameter control
 - **`omni.embed()`** - XML-based multimodal embeddings
 - **Smart Device Management** - Automatic GPU/CPU allocation
@@ -25,6 +27,14 @@ Senter-Omni provides a unified API with just **two functions**:
 - **Multimodal Input** - Text, images, and audio with XML tags
 - **Custom Stop Sequences** - Flexible response termination
 - **OpenAI Compatibility** - `create_chat_completion()` style API
+
+### 🏋️ **Training Capabilities**
+- **Dataset Flexibility** - HuggingFace datasets or local JSON/JSONL files
+- **Multimodal Fine-tuning** - Vision, audio, and text layer optimization
+- **LoRA Efficiency** - Parameter-efficient training with configurable rank
+- **Memory Optimized** - 4-bit quantization and gradient checkpointing
+- **Progress Monitoring** - Real-time training statistics and memory usage
+- **Model Export** - Both LoRA adapters and merged full models
 
 ### 🔍 **Embedding & Similarity**
 - **XML Tag Interface** - `<text>`, `<image>`, `<audio>` tags
@@ -253,6 +263,75 @@ for content in contents:
 
 ## 📖 **API Reference**
 
+### **`omni.train(dataset_name_or_path, **kwargs)`**
+
+Train a new Senter-Omni multimodal chat model from datasets.
+
+**Parameters:**
+- `dataset_name_or_path` (str or list): HuggingFace dataset name(s) or local file path(s)
+- `output_dir` (str, default="models/senter-omni-trained"): Directory to save trained model
+- `max_samples` (int, default=10000): Maximum training samples to use
+- `num_epochs` (int, default=3): Number of training epochs
+- `learning_rate` (float, default=2e-4): Learning rate for training
+- `batch_size` (int, default=2): Batch size per device
+- `gradient_accumulation_steps` (int, default=4): Gradient accumulation steps
+- `lora_rank` (int, default=16): LoRA rank for fine-tuning
+- `save_steps` (int, default=500): Save model every N steps
+
+**Returns:** Dictionary with training statistics, model paths, and metadata
+
+**Examples:**
+```python
+# Train with HuggingFace datasets
+result = omni.train([
+    "NousResearch/Hermes-3-Dataset",
+    "NousResearch/hermes-function-calling-v1"
+])
+
+# Train with local dataset
+result = omni.train(
+    "my_custom_dataset.jsonl",
+    output_dir="models/my-model",
+    max_samples=5000,
+    num_epochs=5,
+    lora_rank=32
+)
+
+# Custom training parameters
+result = omni.train(
+    ["dataset1", "dataset2"],
+    learning_rate=1e-4,
+    batch_size=4,
+    gradient_accumulation_steps=2
+)
+```
+
+**Training Output:**
+```python
+{
+    "status": "completed",
+    "training_stats": {
+        "train_runtime": 1250.34,
+        "train_samples_per_second": 24.0,
+        "total_flos": 1.23e+16
+    },
+    "model_paths": {
+        "lora": "models/my-model/lora",
+        "merged": "models/my-model/merged"
+    },
+    "memory_stats": {
+        "start_memory": 2.1,
+        "peak_memory": 11.8,
+        "max_memory": 12.0,
+        "memory_percentage": 98.3
+    },
+    "dataset_info": {
+        "samples_used": 5000,
+        "datasets": ["NousResearch/Hermes-3-Dataset"]
+    }
+}
+```
+
 ### **`omni.chat(messages, **kwargs)`**
 
 Generate chat completions with full parameter control.
@@ -286,6 +365,12 @@ response = omni.chat(
 response = omni.chat("""
 <user>Describe this image: <image>beach_sunset.jpg</image></user>
 """, max_tokens=100)
+
+# Custom stop sequences
+response = omni.chat(
+    "<user>Write a haiku about AI.</user>",
+    stop_sequences=["\n\n", "<end>"]
+)
 ```
 
 ### **`omni.embed(input_content, operation="embed", **kwargs)`**
@@ -321,6 +406,12 @@ result = omni.embed("""
 <text>Machine learning</text>
 <image>neural_net.jpg</image>
 """, operation="similarity")
+
+# Filtered similarity
+result = omni.embed("""
+<text>Deep learning</text>
+<image>cnn_diagram.jpg</image>
+""", operation="similarity", similarity_threshold=0.7)
 ```
 
 ### **Response Format**
@@ -428,11 +519,28 @@ senter-omni-suite/
 git clone https://github.com/SouthpawIN/senter-omni.git
 cd senter-omni
 
-# Install with all dependencies
+# Install with all dependencies (recommended for training)
 pip install -e ".[all]"
 
-# Or minimal installation
-pip install -e .
+# Or install specific components
+pip install -e .              # Basic chat functionality
+pip install -e ".[embed]"     # Add embedding support
+pip install -e ".[train]"     # Add training capabilities
+
+# For training, also install:
+pip install unsloth trl datasets
+```
+
+### **Training Setup**
+```bash
+# GPU Requirements for Training
+# - NVIDIA GPU with 16GB+ VRAM (RTX 3090/4090 recommended)
+# - CUDA 12.0+
+# - 32GB+ system RAM
+
+# Install training dependencies
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+pip install unsloth transformers accelerate trl datasets
 ```
 
 ## 🚀 **Quick Start Examples**
@@ -481,6 +589,45 @@ result = omni.embed("""
 <image>rocket.jpg</image>
 <audio>launch_sounds.wav</audio>
 """, operation="similarity", similarity_threshold=0.1)
+```
+
+### **6. Complete Workflow: Train → Chat → Embed**
+```python
+import omni
+
+# Step 1: Train a custom model (optional)
+print("🚀 Training custom model...")
+training_result = omni.train(
+    ["NousResearch/Hermes-3-Dataset"],  # Your dataset
+    output_dir="models/my-space-model",
+    max_samples=2000,
+    num_epochs=2
+)
+print(f"✅ Model trained: {training_result['model_paths']['merged']}")
+
+# Step 2: Chat with the model
+print("\\n🤖 Chatting with trained model...")
+response = omni.chat("""
+<user>Explain the concept of space-time curvature.</user>
+""", max_tokens=150, temperature=0.8)
+print(f"Response: {response[:100]}...")
+
+# Step 3: Create embeddings for content analysis
+print("\\n🔍 Creating multimodal embeddings...")
+embed_result = omni.embed("""
+<text>The theory of general relativity revolutionized physics</text>
+<image>black_hole.jpg</image>
+<audio>cosmic_background.wav</audio>
+""", operation="similarity")
+
+print(f"📊 Processed {len(embed_result['modalities'])} modalities")
+print(f"🔗 Found {len(embed_result['similarities'])} similarity pairs")
+for pair, score in embed_result['similarities'].items():
+    print(f"  {pair}: {score:.3f}")
+
+# Step 4: Use embeddings for content retrieval
+print("\\n📈 Content analysis complete!")
+print("🎉 Full multimodal AI pipeline executed successfully!")
 ```
 
 ## 🎯 **Model Capabilities**

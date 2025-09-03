@@ -7,6 +7,8 @@ Unified interface for chat and embedding operations across modalities.
 
 import torch
 import re
+import json
+import os
 from typing import Dict, Any, List, Optional, Union, Iterator
 from pathlib import Path
 
@@ -24,6 +26,17 @@ try:
 except ImportError:
     EMBED_AVAILABLE = False
     print("⚠️ Embedding model not available")
+
+# Training imports
+try:
+    from unsloth import FastModel
+    from unsloth.chat_templates import get_chat_template, standardize_data_formats, train_on_responses_only
+    from datasets import load_dataset, concatenate_datasets, Dataset
+    from trl import SFTTrainer, SFTConfig
+    TRAINING_AVAILABLE = True
+except ImportError:
+    TRAINING_AVAILABLE = False
+    print("⚠️ Training dependencies not available. Install: pip install unsloth trl datasets")
 
 class OmniClient:
     """
@@ -263,6 +276,228 @@ class OmniClient:
 
         return similarities
 
+    def train(self,
+              dataset_name_or_path: Union[str, List[str]],
+              output_dir: str = "models/senter-omni-trained",
+              max_samples: int = 10000,
+              num_epochs: int = 3,
+              learning_rate: float = 2e-4,
+              batch_size: int = 2,
+              gradient_accumulation_steps: int = 4,
+              lora_rank: int = 16,
+              save_steps: int = 500,
+              **kwargs) -> Dict[str, Any]:
+        """
+        Train a new Senter-Omni multimodal chat model
+
+        Args:
+            dataset_name_or_path: Dataset name(s) on HuggingFace or local path(s)
+            output_dir: Directory to save the trained model
+            max_samples: Maximum number of training samples
+            num_epochs: Number of training epochs
+            learning_rate: Learning rate for training
+            batch_size: Batch size per device
+            gradient_accumulation_steps: Gradient accumulation steps
+            lora_rank: LoRA rank for fine-tuning
+            save_steps: Save model every N steps
+            **kwargs: Additional training parameters
+
+        Returns:
+            Dictionary with training statistics and model paths
+        """
+        if not TRAINING_AVAILABLE:
+            raise RuntimeError("Training dependencies not available. Install: pip install unsloth trl datasets")
+
+        print("🚀 Starting Senter-Omni Training Pipeline")
+        print("=" * 60)
+
+        # Step 1: Load and prepare datasets
+        print("📚 Step 1: Loading datasets...")
+        datasets = []
+
+        if isinstance(dataset_name_or_path, str):
+            dataset_name_or_path = [dataset_name_or_path]
+
+        for dataset_source in dataset_name_or_path:
+            if os.path.exists(dataset_source):
+                # Load from local path
+                print(f"Loading local dataset: {dataset_source}")
+                try:
+                    dataset = Dataset.from_json(dataset_source)
+                except:
+                    # Try loading as JSON lines
+                    with open(dataset_source, 'r') as f:
+                        data = [json.loads(line) for line in f]
+                    dataset = Dataset.from_list(data)
+            else:
+                # Load from HuggingFace
+                print(f"Loading HuggingFace dataset: {dataset_source}")
+                try:
+                    dataset = load_dataset(dataset_source, split="train")
+                except:
+                    print(f"⚠️ Could not load {dataset_source}, skipping...")
+                    continue
+
+            datasets.append(dataset)
+
+        if not datasets:
+            raise ValueError("No valid datasets found")
+
+        # Combine datasets
+        if len(datasets) > 1:
+            print("Combining multiple datasets...")
+            combined_dataset = concatenate_datasets(datasets)
+        else:
+            combined_dataset = datasets[0]
+
+        # Shuffle and limit samples
+        combined_dataset = combined_dataset.shuffle(seed=42)
+        dataset = combined_dataset.select(range(min(max_samples, len(combined_dataset))))
+        print(f"📊 Training on {len(dataset)} samples")
+
+        # Step 2: Initialize model
+        print("🤖 Step 2: Initializing Gemma3N model...")
+        model, tokenizer = FastModel.from_pretrained(
+            model_name="unsloth/gemma-3n-E4B-it",
+            dtype=None,
+            max_seq_length=2048,
+            load_in_4bit=True,
+            full_finetuning=False,
+        )
+
+        # Step 3: Configure LoRA
+        print("🔧 Step 3: Configuring LoRA...")
+        model = FastModel.get_peft_model(
+            model,
+            finetune_vision_layers=True,
+            finetune_language_layers=True,
+            finetune_attention_modules=True,
+            finetune_mlp_modules=True,
+            r=lora_rank,
+            lora_alpha=lora_rank,
+            lora_dropout=0.05,
+            bias="none",
+            random_state=3407,
+            target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+        )
+
+        # Step 4: Prepare data
+        print("📝 Step 4: Preparing training data...")
+        tokenizer = get_chat_template(tokenizer, chat_template="gemma-3")
+        dataset = standardize_data_formats(dataset)
+
+        def formatting_prompts_func(examples):
+            convos = examples["conversations"]
+            texts = [tokenizer.apply_chat_template(convo, tokenize=False, add_generation_prompt=False).removeprefix('<bos>') for convo in convos]
+            return {"text": texts}
+
+        dataset = dataset.map(formatting_prompts_func, batched=True)
+
+        # Step 5: Configure trainer
+        print("⚙️ Step 5: Configuring trainer...")
+        trainer = SFTTrainer(
+            model=model,
+            tokenizer=tokenizer,
+            train_dataset=dataset,
+            eval_dataset=None,
+            args=SFTConfig(
+                dataset_text_field="text",
+                per_device_train_batch_size=batch_size,
+                gradient_accumulation_steps=gradient_accumulation_steps,
+                warmup_steps=10,
+                num_train_epochs=num_epochs,
+                max_steps=None,
+                learning_rate=learning_rate,
+                logging_steps=10,
+                optim="adamw_8bit",
+                weight_decay=0.01,
+                lr_scheduler_type="cosine",
+                seed=3407,
+                report_to="none",
+                save_steps=save_steps,
+                save_total_limit=3,
+                fp16=True,
+                gradient_checkpointing=True,
+                **kwargs
+            ),
+        )
+
+        # Optimize training
+        trainer = train_on_responses_only(
+            trainer,
+            instruction_part="<start_of_turn>user\n",
+            response_part="<start_of_turn>model\n",
+        )
+
+        # Step 6: Train!
+        print("🏃 Step 6: Training model...")
+        gpu_stats = torch.cuda.get_device_properties(0)
+        start_gpu_memory = round(torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024, 3)
+        max_memory = round(gpu_stats.total_memory / 1024 / 1024 / 1024, 3)
+        print(f"GPU = {gpu_stats.name}. Max memory = {max_memory} GB.")
+        print(f"{start_gpu_memory} GB of memory reserved.")
+
+        trainer_stats = trainer.train()
+
+        # Step 7: Save model
+        print("💾 Step 7: Saving model...")
+        os.makedirs(output_dir, exist_ok=True)
+
+        # Save LoRA adapters
+        lora_path = f"{output_dir}/lora"
+        model.save_pretrained(lora_path)
+        tokenizer.save_pretrained(lora_path)
+
+        # Merge and save full model
+        merged_path = f"{output_dir}/merged"
+        merged_model = model.merge_and_unload()
+        merged_model.save_pretrained(merged_path)
+        tokenizer.save_pretrained(merged_path)
+
+        # Final memory stats
+        used_memory = round(torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024, 3)
+        used_memory_for_lora = round(used_memory - start_gpu_memory, 3)
+        used_percentage = round(used_memory / max_memory * 100, 3)
+        lora_percentage = round(used_memory_for_lora / max_memory * 100, 3)
+
+        print("🎉 Training Complete!")
+        print(f"Training time: {trainer_stats.metrics['train_runtime']} seconds")
+        print(f"Peak memory: {used_memory} GB ({used_percentage}%)")
+
+        training_result = {
+            "status": "completed",
+            "training_stats": trainer_stats.metrics,
+            "model_paths": {
+                "lora": lora_path,
+                "merged": merged_path
+            },
+            "memory_stats": {
+                "start_memory": start_gpu_memory,
+                "peak_memory": used_memory,
+                "max_memory": max_memory,
+                "memory_percentage": used_percentage
+            },
+            "dataset_info": {
+                "samples_used": len(dataset),
+                "datasets": dataset_name_or_path
+            },
+            "training_config": {
+                "epochs": num_epochs,
+                "learning_rate": learning_rate,
+                "batch_size": batch_size,
+                "lora_rank": lora_rank
+            }
+        }
+
+        # Save training summary
+        with open(f"{output_dir}/training_summary.json", "w") as f:
+            json.dump(training_result, f, indent=2, default=str)
+
+        print(f"📄 Training summary saved to: {output_dir}/training_summary.json")
+        print(f"🤖 Model saved to: {merged_path}")
+
+        return training_result
+
 # Global instance for easy access
 _omni_client = None
 
@@ -330,6 +565,58 @@ def embed(input_content: str,
         **kwargs
     )
 
+def train(dataset_name_or_path: Union[str, List[str]],
+          output_dir: str = "models/senter-omni-trained",
+          max_samples: int = 10000,
+          num_epochs: int = 3,
+          learning_rate: float = 2e-4,
+          batch_size: int = 2,
+          gradient_accumulation_steps: int = 4,
+          lora_rank: int = 16,
+          save_steps: int = 500,
+          **kwargs) -> Dict[str, Any]:
+    """
+    Train a new Senter-Omni multimodal chat model
+
+    Args:
+        dataset_name_or_path: Dataset name(s) on HuggingFace or local path(s)
+        output_dir: Directory to save the trained model
+        max_samples: Maximum number of training samples
+        num_epochs: Number of training epochs
+        learning_rate: Learning rate for training
+        batch_size: Batch size per device
+        gradient_accumulation_steps: Gradient accumulation steps
+        lora_rank: LoRA rank for fine-tuning
+        save_steps: Save model every N steps
+        **kwargs: Additional training parameters
+
+    Returns:
+        Dictionary with training statistics and model paths
+
+    Example:
+        # Train with HuggingFace datasets
+        result = omni.train([
+            "NousResearch/Hermes-3-Dataset",
+            "NousResearch/hermes-function-calling-v1"
+        ])
+
+        # Train with local dataset
+        result = omni.train("my_dataset.jsonl", max_samples=5000)
+    """
+    client = OmniClient()  # Create new client for training
+    return client.train(
+        dataset_name_or_path=dataset_name_or_path,
+        output_dir=output_dir,
+        max_samples=max_samples,
+        num_epochs=num_epochs,
+        learning_rate=learning_rate,
+        batch_size=batch_size,
+        gradient_accumulation_steps=gradient_accumulation_steps,
+        lora_rank=lora_rank,
+        save_steps=save_steps,
+        **kwargs
+    )
+
 # Convenience functions
 def create_chat_completion(**kwargs):
     """Alias for chat() to match OpenAI API style"""
@@ -374,8 +661,9 @@ def example_embed():
 
 if __name__ == "__main__":
     print("🎭 Senter-Omni Unified API")
-    print("=" * 50)
+    print("=" * 60)
     print("Available functions:")
+    print("• omni.train() - Train new multimodal chat models")
     print("• omni.chat() - Chat completions with parameters")
     print("• omni.embed() - Multimodal embeddings with XML tags")
     print("• omni.create_chat_completion() - OpenAI-style API")
@@ -383,6 +671,9 @@ if __name__ == "__main__":
 
     print("\\n📖 Usage Examples:")
     print("```python")
+    print("# Train a new model")
+    print("result = omni.train(['NousResearch/Hermes-3-Dataset'], max_samples=5000)")
+    print("")
     print("# Chat")
     print("response = omni.chat('<user>Hello!</user>', max_tokens=100, temperature=0.7)")
     print("")

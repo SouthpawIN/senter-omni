@@ -1,12 +1,21 @@
-# 🤖 Senter-Omni
+# 🤖 Senter-Omni Suite
 
-**Advanced Multimodal AI Assistant with XML Tag Support**
+**Dual Multimodal AI Models: Chat & Embedding with XML Tag Support**
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
+## 🎯 Two Powerful Models
+
+### 🤖 Senter-Omni (Chat Model)
+Advanced conversational AI with XML tag support for multimodal interactions.
+
+### 🔍 Senter-Embed (Embedding Model)
+Comprehensive multimodal embedding system for similarity search across text, images, audio, and video.
+
 ## ✨ Features
 
+### Chat Model (Senter-Omni)
 - **🧠 Advanced Reasoning** - Fine-tuned on Hermes-3-Dataset for superior problem-solving
 - **🔧 Function Calling** - Enhanced tool use and API integration capabilities
 - **🆓 Uncensored** - Direct, unrestricted responses without content filters
@@ -16,16 +25,58 @@
 - **🛑 Stop Token Handling** - Automatic conversation termination
 - **📝 Gemma3N Integration** - Native support for Gemma3N chat format
 
+### Embedding Model (Senter-Embed)
+- **🔍 Similarity Search** - Find similar content across modalities
+- **📊 Multimodal Embeddings** - Text, image, audio, and video embeddings
+- **🗄️ Database Support** - Persistent storage and retrieval
+- **🔄 Unified Space** - Common embedding dimension for all modalities
+- **⚡ Memory Efficient** - 4-bit quantization support
+- **🎵 Audio Processing** - Speech and music embedding
+- **🎥 Video Processing** - Frame-by-frame analysis
+- **📈 Cosine Similarity** - Efficient similarity computation
+
 ## 🚀 Quick Start
 
-### 1. Interactive Chat
+### Install Package
 ```bash
-cd /home/sovthpaw/Desktop/senter-omni
-source venv/bin/activate  # Activate virtual environment
-python advanced_chat.py  # Start advanced interactive chat
+# Install basic functionality
+pip install -e .
+
+# Install with multimodal support (recommended)
+pip install -e ".[multimodal]"
+
+# Install everything including dev tools
+pip install -e ".[all]"
 ```
 
-### 2. XML Tag Examples
+### 1. Chat Model - Interactive Mode
+```bash
+# Start interactive chat
+senter-omni
+
+# Or use Python API
+python -c "from senter_omni import SenterOmniChat; chat = SenterOmniChat()"
+```
+
+### 2. Embedding Model - Similarity Search
+```bash
+# Start embedding CLI
+senter-embed demo  # Run demo
+senter-embed embed --text "Hello world!"  # Generate embeddings
+senter-embed db add --text "Sample text" --db my_database.pkl  # Add to database
+senter-embed db search --text "Similar text" --db my_database.pkl  # Search database
+
+# Or use Python API
+python -c "
+from senter_embed import SenterEmbedder, MultimodalEmbeddingDatabase
+embedder = SenterEmbedder()
+db = MultimodalEmbeddingDatabase(embedder)
+db.add_content({'text': 'Sample content'})
+results = db.search_similar({'text': 'Similar query'})
+"
+```
+
+### 3. XML Tag Examples
 ```bash
 # System prompts
 <system>You are a helpful AI assistant.</system>
@@ -43,23 +94,32 @@ python advanced_chat.py  # Start advanced interactive chat
 ## 📁 Project Structure
 
 ```
-senter-omni/
-├── advanced_chat.py          # Main advanced chat interface with XML support
-├── senter_omni_utils.py      # Utility functions and classes
-├── models/
-│   ├── huggingface/          # HuggingFace models
-│   │   ├── senter-omni-lora/     # LoRA adapter (recommended)
-│   │   │   └── chat_template.jinja  # Gemma3N chat format
-│   │   └── senter-omni-merged/   # Full merged model
-│   └── gguf/                 # GGUF models (future)
-├── scripts/                  # Utility scripts
-│   ├── convert_to_gguf.py    # Model conversion utilities
-│   └── prepare_hermes_data.py # Data preparation
-├── notebooks/                # Training and development notebooks
-├── test_assets/              # Test files (images, audio)
-├── data/                     # Training datasets
-├── requirements.txt          # Python dependencies
-└── venv/                     # Virtual environment (auto-created)
+senter-omni-suite/
+├── senter_omni/              # Chat model package
+│   ├── __init__.py          # Package initialization
+│   ├── core.py              # Main chat functionality
+│   ├── embedder.py         # Lightweight embedding for chat
+│   └── cli.py               # Command-line interface
+├── senter_embed/            # Embedding model package
+│   ├── __init__.py          # Package initialization
+│   ├── core.py              # Main embedding functionality
+│   ├── database.py          # Database operations
+│   ├── utils.py             # Utility functions
+│   └── cli.py               # Command-line interface
+├── senter_omni_cli.py       # CLI entry point for chat model
+├── senter_embed_cli.py      # CLI entry point for embedding model
+├── simple_embedding_demo.py # CPU-based demo
+├── advanced_chat.py         # Legacy chat interface
+├── senter_omni_embedder.py  # Legacy embedding interface
+├── models/                  # Model files
+│   └── huggingface/
+│       └── senter-omni-lora/ # LoRA adapter with Gemma3N
+├── scripts/                 # Utility scripts
+├── notebooks/               # Training notebooks
+├── test_assets/             # Test files
+├── requirements.txt         # Dependencies
+├── setup_package.py         # Package setup
+└── README.md               # This file
 ```
 
 ## 🎯 Model Capabilities
@@ -84,17 +144,45 @@ senter-omni/
 
 ## 💻 Usage Examples
 
-### Interactive Chat with XML Support
+### Senter-Omni (Chat Model)
 ```bash
-python advanced_chat.py
+# Interactive chat with XML support
+senter-omni
+
+# API mode with JSON input
+echo '{"messages": [{"role": "user", "content": "Hello!"}]}' | senter-omni --api
+
+# Python API
+from senter_omni import SenterOmniChat
+chat = SenterOmniChat()
+response = chat.generate_streaming(["<user>Hello!</user>"])
 ```
 
-**Available Commands:**
+**Chat Commands:**
 - `help` - Show help information and XML examples
 - `clear` - Clear conversation history
 - `history` - View conversation history
 - `video` - Check video support capabilities
 - `quit` - Exit chat
+
+### Senter-Embed (Embedding Model)
+```bash
+# Run demo
+senter-embed demo
+
+# Generate embeddings
+senter-embed embed --text "Hello world!" --output embeddings.json
+
+# Database operations
+senter-embed db add --text "Sample text" --db my_db.pkl
+senter-embed db search --text "Similar query" --db my_db.pkl --top-k 5
+senter-embed db info --db my_db.pkl
+
+# Python API
+from senter_embed import SenterEmbedder, MultimodalEmbeddingDatabase
+embedder = SenterEmbedder()
+db = MultimodalEmbeddingDatabase(embedder)
+```
 
 ### XML Tag Usage
 

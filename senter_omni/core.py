@@ -63,12 +63,12 @@ class SenterOmniChat:
         self.device = self._setup_device(device)
         self.model_path = model_path
 
-        # Define stop tokens for Gemma3N
+        # Define stop tokens for Qwen2.5-Omni
         self.stop_tokens = [
-            "<start_of_turn>",
-            "<end_of_turn>",
-            "<start_of_turn>user",
-            "<start_of_turn>system",
+            "<|im_end|>",
+            "<|im_start|>",
+            "<|im_start|>user",
+            "<|im_start|>system",
             "</s>"
         ]
 
@@ -81,13 +81,13 @@ class SenterOmniChat:
         return device
 
     def load_model(self):
-        """Load the Gemma3N model"""
+        """Load the Qwen2.5-Omni model"""
         print("🤖 Loading Senter-Omni Chat Model...")
 
         try:
             # Load base model
             base_model = AutoModelForCausalLM.from_pretrained(
-                "unsloth/gemma-3n-E4B-it",
+                "Qwen/Qwen2.5-Omni-3B",
                 torch_dtype=torch.float16 if self.device != "cpu" else torch.float32,
                 device_map={"": self.device},
                 trust_remote_code=True
@@ -97,7 +97,7 @@ class SenterOmniChat:
             self.model = PeftModel.from_pretrained(base_model, self.model_path)
 
             # Load tokenizer and processor
-            self.tokenizer = AutoTokenizer.from_pretrained("unsloth/gemma-3n-E4B-it")
+            self.tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-Omni-3B")
 
             print("✅ Senter-Omni Chat Model loaded successfully!")
             print(f"📍 Device: {self.device}")
@@ -118,7 +118,7 @@ class SenterOmniChat:
         - <audio></audio>
         - <video></video>
 
-        Converts XML to proper Gemma3N chat format
+        Converts XML to proper Qwen2.5-Omni chat format
         """
         parsed = {
             "role": "user",  # default
@@ -152,11 +152,13 @@ class SenterOmniChat:
                         "content": match.strip()
                     })
 
-                    # For Gemma3N, images use <start_of_image> token
+                    # For Qwen2.5-Omni, use appropriate multimodal tokens
                     if tag == "image":
-                        replacement = f'<start_of_image>{match.strip()}'
+                        replacement = f'<|vision_start|>{match.strip()}<|vision_end|>'
+                    elif tag == "audio":
+                        replacement = f'<|audio_start|>{match.strip()}<|audio_end|>'
                     else:
-                        # For audio/video, keep descriptive format
+                        # For video or other content, keep descriptive format
                         replacement = f'[{tag.upper()}: {match.strip()[:50]}...]'
                     content = re.sub(pattern, replacement, content, flags=re.DOTALL)
 

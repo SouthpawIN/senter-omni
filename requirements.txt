@@ -1,4 +1,4 @@
-# Core dependencies for Gemma3N training with Hermes datasets
+# Core dependencies for Qwen2.5-Omni training with multimodal datasets
 torch>=2.6.0
 transformers>=4.55.4
 unsloth
@@ -11,7 +11,7 @@ trl
 sentencepiece
 protobuf
 hf-transfer
-timm  # For Gemma 3N vision
+timm  # For Qwen2.5-Omni vision processing
 xformers
 triton
 cut-cross-entropy

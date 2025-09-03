@@ -34,7 +34,7 @@ except ImportError:
 
 class SenterEmbedder:
     """
-    Comprehensive multimodal embedding model for similarity search using Gemma3N
+    Comprehensive multimodal embedding model for similarity search using Qwen2.5-Omni
     """
 
     def __init__(self, model_path="models/huggingface/senter-omni-lora", device="auto", use_memory_efficient=True):
@@ -54,7 +54,7 @@ class SenterEmbedder:
         self.use_memory_efficient = use_memory_efficient
 
         # Embedding dimensions for different modalities
-        self.text_embed_dim = 4096  # Gemma3N hidden size
+        self.text_embed_dim = 3584  # Qwen2.5-Omni hidden size
         self.vision_embed_dim = 2048  # Vision encoder output (from config)
         self.audio_embed_dim = 1536  # Audio encoder output (from config)
 
@@ -70,13 +70,13 @@ class SenterEmbedder:
         return device
 
     def load_model(self):
-        """Load the Gemma3N model and processors"""
+        """Load the Qwen2.5-Omni model and processors"""
         print("🤖 Loading Senter-Embed Multimodal Model...")
 
         try:
             # Load base model with same memory approach as chat model
             base_model = AutoModelForCausalLM.from_pretrained(
-                "unsloth/gemma-3n-E4B-it",
+                "Qwen/Qwen2.5-Omni-3B",
                 torch_dtype=torch.float16 if self.device != "cpu" else torch.float32,
                 device_map={"": self.device},  # Same as chat model - no auto device mapping
                 trust_remote_code=True
@@ -86,8 +86,8 @@ class SenterEmbedder:
             self.model = PeftModel.from_pretrained(base_model, self.model_path)
 
             # Load tokenizer and processor
-            self.tokenizer = AutoTokenizer.from_pretrained("unsloth/gemma-3n-E4B-it")
-            self.processor = AutoProcessor.from_pretrained("unsloth/gemma-3n-E4B-it")
+            self.tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-Omni-3B")
+            self.processor = AutoProcessor.from_pretrained("Qwen/Qwen2.5-Omni-3B")
 
             print("✅ Senter-Embed Multimodal Model loaded successfully!")
             print(f"📍 Device: {self.device}")
@@ -103,7 +103,7 @@ class SenterEmbedder:
 
     def get_text_embedding(self, text: str, normalize: bool = True) -> torch.Tensor:
         """
-        Generate text embedding from input text using proper Gemma3N extraction
+        Generate text embedding from input text using proper Qwen2.5-Omni extraction
 
         Args:
             text: Input text to embed
@@ -112,7 +112,7 @@ class SenterEmbedder:
         Returns:
             Text embedding tensor
         """
-        # Use proper Gemma3N text embedding extraction
+        # Use proper Qwen2.5-Omni text embedding extraction
         with torch.no_grad():
             # Use autocast for precision stability
             with torch.amp.autocast('cuda', dtype=torch.float32):
@@ -157,7 +157,7 @@ class SenterEmbedder:
 
     def get_image_embedding(self, image: Union[str, Image.Image, np.ndarray], normalize: bool = True) -> torch.Tensor:
         """
-        Generate image embedding using Gemma3N vision tower
+        Generate image embedding using Qwen2.5-Omni vision tower
 
         Args:
             image: Image path, PIL Image, or numpy array
@@ -190,7 +190,7 @@ class SenterEmbedder:
             # Filter inputs to only pass image-related tensors to vision tower
             vision_inputs = {k: v for k, v in inputs.items() if k in ['pixel_values']}
 
-            # Use autocast to prevent NaN issues with Conv2D layers (Gemma3n specific fix)
+            # Use autocast to prevent NaN issues with Conv2D layers (Qwen2.5-Omni specific fix)
             with torch.amp.autocast('cuda', dtype=torch.float32):
                 # Get image features directly using the model's method
                 if hasattr(base_model, 'get_image_features'):
@@ -229,7 +229,7 @@ class SenterEmbedder:
 
     def get_audio_embedding(self, audio: Union[str, np.ndarray], sr: int = 16000, normalize: bool = True) -> torch.Tensor:
         """
-        Generate audio embedding from speech/audio using Gemma3N audio tower
+        Generate audio embedding from speech/audio using Qwen2.5-Omni audio tower
 
         Args:
             audio: Audio file path or numpy array
@@ -253,7 +253,7 @@ class SenterEmbedder:
             audio_array = audio_array[np.newaxis, :]  # Add batch dimension
 
         # Process audio with audio encoder
-        # Gemma3N processor requires both text and audio inputs
+        # Qwen2.5-Omni processor requires both text and audio inputs
         inputs = self.processor(
             audio=audio_array,
             sampling_rate=sr,
@@ -271,7 +271,7 @@ class SenterEmbedder:
                 'audio_mel_mask': inputs['input_features_mask']
             }
 
-            # Use autocast to prevent precision issues (Gemma3n specific fix)
+            # Use autocast to prevent precision issues (Qwen2.5-Omni specific fix)
             with torch.amp.autocast('cuda', dtype=torch.float32):
                 audio_outputs = base_model.audio_tower(**audio_inputs)
 

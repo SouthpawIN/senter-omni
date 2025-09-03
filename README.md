@@ -44,7 +44,7 @@ Senter-Omni provides a unified API with **three core functions**:
 - **Similarity Thresholding** - Filter results by relevance
 
 ### 🧬 **Technical Excellence**
-- **Gemma3N Foundation** - State-of-the-art multimodal architecture
+- **Qwen2.5-Omni Foundation** - Apache 2.0 licensed multimodal architecture
 - **Precision Optimization** - Fixed NaN issues with autocast
 - **Memory Efficient** - GPU memory fragmentation resolved
 - **Production Ready** - Robust error handling and fallbacks
@@ -486,7 +486,7 @@ senter-omni-suite/
 ├── omni.py                  # 🎭 UNIFIED API (Main Interface)
 ├── __init__.py              # Package initialization
 ├── senter_omni/             # Chat model package
-│   ├── core.py              # Gemma3N chat functionality
+│   ├── core.py              # Qwen2.5-Omni chat functionality
 │   └── cli.py               # Chat CLI interface
 ├── senter_embed/            # Embedding model package
 │   ├── core.py              # Multimodal embeddings
@@ -494,7 +494,7 @@ senter-omni-suite/
 │   └── utils.py             # Utility functions
 ├── gpu_memory_optimizer.py  # Memory optimization tools
 ├── example_usage.py         # Comprehensive examples
-├── models/                  # Model files (Gemma3N + LoRA)
+├── models/                  # Model files (Qwen2.5-Omni + LoRA)
 ├── test_assets/             # Test files (images, audio)
 ├── requirements.txt         # Dependencies
 └── README.md                # This documentation
@@ -653,7 +653,7 @@ print("🎉 Full multimodal AI pipeline executed successfully!")
 ## 📈 **Performance & Quality**
 
 ### **Technical Achievements**
-- ✅ **Gemma3N Foundation** - State-of-the-art multimodal architecture
+- ✅ **Qwen2.5-Omni Foundation** - Apache 2.0 licensed multimodal architecture
 - ✅ **Precision Optimization** - Fixed NaN issues with autocast
 - ✅ **Memory Efficiency** - GPU memory fragmentation resolved
 - ✅ **Cross-Modal Search** - Unified similarity across 1024D space
@@ -680,7 +680,7 @@ print("🎉 Full multimodal AI pipeline executed successfully!")
 - **Documentation**: Complete API reference and examples
 
 ### **🔬 Research Grade**
-- **Gemma3N Integration**: Latest multimodal architecture
+- **Qwen2.5-Omni Integration**: Apache 2.0 licensed multimodal architecture
 - **Cross-Modal Understanding**: True multimodal reasoning
 - **Extensible Design**: Easy to add new modalities
 - **Open Source**: Fully transparent and modifiable
@@ -699,7 +699,7 @@ print("🎉 Full multimodal AI pipeline executed successfully!")
 
 ## 🙏 **Acknowledgments**
 
-- **Google DeepMind** - Gemma3N architecture and models
+- **Alibaba Cloud** - Qwen2.5-Omni architecture and models
 - **Unsloth Team** - Optimization insights and fixes
 - **Hugging Face** - Transformers library and model hosting
 - **PyTorch Team** - Deep learning framework

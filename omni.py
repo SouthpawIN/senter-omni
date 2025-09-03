@@ -356,11 +356,11 @@ class OmniClient:
         print(f"📊 Training on {len(dataset)} samples")
 
         # Step 2: Initialize model
-        print("🤖 Step 2: Initializing Gemma3N model...")
+        print("🤖 Step 2: Initializing Qwen2.5-Omni model...")
         model, tokenizer = FastModel.from_pretrained(
-            model_name="unsloth/gemma-3n-E4B-it",
+            model_name="Qwen/Qwen2.5-Omni-3B",
             dtype=None,
-            max_seq_length=2048,
+            max_seq_length=32768,  # Qwen supports much longer contexts
             load_in_4bit=True,
             full_finetuning=False,
         )
@@ -383,7 +383,7 @@ class OmniClient:
 
         # Step 4: Prepare data
         print("📝 Step 4: Preparing training data...")
-        tokenizer = get_chat_template(tokenizer, chat_template="gemma-3")
+        tokenizer = get_chat_template(tokenizer, chat_template="qwen-2.5")
         dataset = standardize_data_formats(dataset)
 
         def formatting_prompts_func(examples):
@@ -425,8 +425,8 @@ class OmniClient:
         # Optimize training
         trainer = train_on_responses_only(
             trainer,
-            instruction_part="<start_of_turn>user\n",
-            response_part="<start_of_turn>model\n",
+            instruction_part="<|im_start|>user\n",
+            response_part="<|im_start|>assistant\n",
         )
 
         # Step 6: Train!

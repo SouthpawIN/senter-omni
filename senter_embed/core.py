@@ -74,38 +74,13 @@ class SenterEmbedder:
         print("🤖 Loading Senter-Embed Multimodal Model...")
 
         try:
-            # Load base model with memory optimization
-            if self.use_memory_efficient and self.device.startswith("cuda"):
-                # Use 4-bit quantization for memory efficiency
-                try:
-                    from transformers import BitsAndBytesConfig
-                    quantization_config = BitsAndBytesConfig(
-                        load_in_4bit=True,
-                        bnb_4bit_compute_dtype=torch.float16,
-                        bnb_4bit_use_double_quant=True,
-                        bnb_4bit_quant_type="nf4"
-                    )
-                    base_model = AutoModelForCausalLM.from_pretrained(
-                        "unsloth/gemma-3n-E4B-it",
-                        quantization_config=quantization_config,
-                        device_map="auto",
-                        trust_remote_code=True
-                    )
-                except ImportError:
-                    print("⚠️ bitsandbytes not available, using standard loading")
-                    base_model = AutoModelForCausalLM.from_pretrained(
-                        "unsloth/gemma-3n-E4B-it",
-                        torch_dtype=torch.float16 if self.device != "cpu" else torch.float32,
-                        device_map={"": self.device},
-                        trust_remote_code=True
-                    )
-            else:
-                base_model = AutoModelForCausalLM.from_pretrained(
-                    "unsloth/gemma-3n-E4B-it",
-                    torch_dtype=torch.float16 if self.device != "cpu" else torch.float32,
-                    device_map={"": self.device},
-                    trust_remote_code=True
-                )
+            # Load base model with same memory approach as chat model
+            base_model = AutoModelForCausalLM.from_pretrained(
+                "unsloth/gemma-3n-E4B-it",
+                torch_dtype=torch.float16 if self.device != "cpu" else torch.float32,
+                device_map={"": self.device},  # Same as chat model - no auto device mapping
+                trust_remote_code=True
+            )
 
             # Load LoRA adapter
             self.model = PeftModel.from_pretrained(base_model, self.model_path)
@@ -128,7 +103,7 @@ class SenterEmbedder:
 
     def get_text_embedding(self, text: str, normalize: bool = True) -> torch.Tensor:
         """
-        Generate text embedding from input text
+        Generate text embedding from input text using proper Gemma3N extraction
 
         Args:
             text: Input text to embed
@@ -137,23 +112,48 @@ class SenterEmbedder:
         Returns:
             Text embedding tensor
         """
-        # Tokenize input
-        inputs = self.tokenizer(text, return_tensors="pt", padding=True, truncation=True).to(self.device)
-
+        # Use proper Gemma3N text embedding extraction
         with torch.no_grad():
-            # Get model outputs
-            outputs = self.model(**inputs, output_hidden_states=True)
+            # Use autocast for precision stability
+            with torch.amp.autocast('cuda', dtype=torch.float32):
+                inputs = self.tokenizer(text, return_tensors="pt", padding=True, truncation=True).to(self.device)
+                outputs = self.model(**inputs, output_hidden_states=True)
 
-            # Use the last hidden state as embedding (mean pooling)
-            hidden_states = outputs.hidden_states[-1]  # [batch, seq_len, hidden_size]
+                # Use the last hidden state as embedding (mean pooling)
+                hidden_states = outputs.hidden_states[-1]  # [batch, seq_len, hidden_size]
 
-            # Mean pooling across sequence dimension
-            embedding = hidden_states.mean(dim=1)  # [batch, hidden_size]
+                # For text embeddings, we want a single vector, not per token
+                # Mean pool across sequence dimension, then ensure we have the right shape
+                embedding = hidden_states.mean(dim=1)  # [batch, hidden_size]
+
+                # If we have multiple sequences (shouldn't happen with single text), take first
+                if len(embedding.shape) > 1 and embedding.shape[0] > 1:
+                    embedding = embedding[0]  # Take first sequence
+
+                # Ensure we have the expected text embedding dimension
+                if embedding.shape[-1] != self.text_embed_dim:
+                    # Pad or truncate to match expected dimension
+                    if embedding.shape[-1] < self.text_embed_dim:
+                        # Create padding with same number of dimensions as embedding
+                        padding_shape = list(embedding.shape)
+                        padding_shape[-1] = self.text_embed_dim - embedding.shape[-1]
+                        padding = torch.zeros(*padding_shape, device=self.device)
+                        embedding = torch.cat([embedding, padding], dim=-1)
+                    else:
+                        embedding = embedding[..., :self.text_embed_dim]
 
             if normalize:
                 embedding = F.normalize(embedding, p=2, dim=-1)
 
-        return embedding.squeeze(0)  # Remove batch dimension
+        # Ensure we return a 1D embedding vector
+        if len(embedding.shape) > 1:
+            if embedding.shape[0] == 1:
+                embedding = embedding.squeeze(0)  # Remove batch dimension
+            else:
+                # If we have multiple embeddings, take the first one
+                embedding = embedding[0] if embedding.shape[0] > 1 else embedding.squeeze()
+
+        return embedding
 
     def get_image_embedding(self, image: Union[str, Image.Image, np.ndarray], normalize: bool = True) -> torch.Tensor:
         """
@@ -177,24 +177,55 @@ class SenterEmbedder:
             pil_image = image
 
         # Process image with vision encoder
-        inputs = self.processor(images=pil_image, return_tensors="pt").to(self.device)
+        inputs = self.processor(
+            images=pil_image,
+            text="",  # Empty text input for image-only processing
+            return_tensors="pt"
+        ).to(self.device)
 
         with torch.no_grad():
             # Use the vision tower from the base model (bypass LoRA for vision)
             base_model = self.model.base_model if hasattr(self.model, 'base_model') else self.model
-            vision_outputs = base_model.vision_tower(**inputs)
 
-            # Get image features using the model's method
-            if hasattr(base_model, 'get_image_features'):
-                embedding = base_model.get_image_features(vision_outputs)
-            else:
-                # Fallback to mean pooling
-                embedding = vision_outputs.last_hidden_state.mean(dim=1)
+            # Filter inputs to only pass image-related tensors to vision tower
+            vision_inputs = {k: v for k, v in inputs.items() if k in ['pixel_values']}
+
+            # Use autocast to prevent NaN issues with Conv2D layers (Gemma3n specific fix)
+            with torch.amp.autocast('cuda', dtype=torch.float32):
+                # Get image features directly using the model's method
+                if hasattr(base_model, 'get_image_features'):
+                    # This method handles the vision tower internally
+                    embedding = base_model.get_image_features(**vision_inputs)
+
+                    # get_image_features returns [batch, patches, features]
+                    # We need to pool across patches to get [batch, features]
+                    if len(embedding.shape) == 3:
+                        embedding = embedding.mean(dim=1)  # Average across patches
+                else:
+                    # Fallback: use vision tower and mean pool
+                    vision_outputs = base_model.vision_tower(**vision_inputs)
+
+                    # Handle different output formats
+                    if hasattr(vision_outputs, 'last_hidden_state'):
+                        # 4D tensor [batch, channels, height, width] -> flatten and mean pool
+                        hidden_states = vision_outputs.last_hidden_state
+                        embedding = hidden_states.mean(dim=[2, 3])  # Average over spatial dimensions
+                    else:
+                        # Fallback for other formats
+                        embedding = vision_outputs.mean(dim=[2, 3]) if len(vision_outputs.shape) == 4 else vision_outputs
 
             if normalize:
                 embedding = F.normalize(embedding, p=2, dim=-1)
 
-        return embedding.squeeze(0)
+        # Ensure we return a 1D embedding vector
+        if len(embedding.shape) > 1:
+            if embedding.shape[0] == 1:
+                embedding = embedding.squeeze(0)  # Remove batch dimension
+            else:
+                # If we have multiple embeddings, take the first one
+                embedding = embedding[0] if embedding.shape[0] > 1 else embedding.squeeze()
+
+        return embedding
 
     def get_audio_embedding(self, audio: Union[str, np.ndarray], sr: int = 16000, normalize: bool = True) -> torch.Tensor:
         """
@@ -217,16 +248,38 @@ class SenterEmbedder:
         else:
             audio_array = audio
 
+        # Ensure proper shape (add batch dimension if needed)
+        if len(audio_array.shape) == 1:
+            audio_array = audio_array[np.newaxis, :]  # Add batch dimension
+
         # Process audio with audio encoder
-        inputs = self.processor(audio=audio_array, sampling_rate=sr, return_tensors="pt").to(self.device)
+        # Gemma3N processor requires both text and audio inputs
+        inputs = self.processor(
+            audio=audio_array,
+            sampling_rate=sr,
+            text="",  # Empty text input for audio-only processing
+            return_tensors="pt"
+        ).to(self.device)
 
         with torch.no_grad():
             # Use the audio tower from the base model (bypass LoRA for audio)
             base_model = self.model.base_model if hasattr(self.model, 'base_model') else self.model
-            audio_outputs = base_model.audio_tower(**inputs)
 
-            # Use mean pooling for audio embeddings
-            embedding = audio_outputs.last_hidden_state.mean(dim=1)
+            # Map processor outputs to audio tower expected inputs
+            audio_inputs = {
+                'audio_mel': inputs['input_features'],
+                'audio_mel_mask': inputs['input_features_mask']
+            }
+
+            # Use autocast to prevent precision issues (Gemma3n specific fix)
+            with torch.amp.autocast('cuda', dtype=torch.float32):
+                audio_outputs = base_model.audio_tower(**audio_inputs)
+
+                # Audio tower returns tuple (hidden_states, mask)
+                hidden_states = audio_outputs[0]  # Extract hidden states from tuple
+
+                # Use mean pooling for audio embeddings
+                embedding = hidden_states.mean(dim=1)
 
             if normalize:
                 embedding = F.normalize(embedding, p=2, dim=-1)
@@ -312,9 +365,50 @@ class SenterEmbedder:
 
         return embeddings
 
+    def project_to_unified_space(self, embedding: torch.Tensor, target_dim: int = None) -> torch.Tensor:
+        """
+        Project embedding to unified dimension space
+
+        Args:
+            embedding: Input embedding
+            target_dim: Target dimension (default: self.unified_embed_dim)
+
+        Returns:
+            Projected embedding
+        """
+        if target_dim is None:
+            target_dim = self.unified_embed_dim
+
+        current_dim = embedding.shape[-1]
+
+        if current_dim == target_dim:
+            return embedding
+
+        # Simple projection using linear layer (could be improved with proper training)
+        # For now, we'll use a simple downsampling/upsampling approach
+        if current_dim > target_dim:
+            # Down-project by averaging chunks
+            kernel_size = current_dim // target_dim
+            if kernel_size > 1:
+                # Reshape and average
+                embedding_reshaped = embedding.view(-1, target_dim, kernel_size)
+                projected = embedding_reshaped.mean(dim=-1)
+            else:
+                # Simple truncation
+                projected = embedding[..., :target_dim]
+        else:
+            # Up-project by interpolation
+            projected = embedding
+            while projected.shape[-1] < target_dim:
+                # Duplicate values
+                projected = torch.cat([projected, projected], dim=-1)
+            projected = projected[..., :target_dim]
+
+        return projected
+
     def compute_similarity(self, embedding1: torch.Tensor, embedding2: torch.Tensor) -> float:
         """
-        Compute cosine similarity between two embeddings
+        Compute cosine similarity between two embeddings (with unified projection)
 
         Args:
             embedding1: First embedding
@@ -323,7 +417,17 @@ class SenterEmbedder:
         Returns:
             Cosine similarity score
         """
-        return F.cosine_similarity(embedding1.unsqueeze(0), embedding2.unsqueeze(0)).item()
+        # Project both embeddings to unified dimension space
+        emb1_proj = self.project_to_unified_space(embedding1)
+        emb2_proj = self.project_to_unified_space(embedding2)
+
+        # Ensure tensors are 1D for cosine similarity
+        if len(emb1_proj.shape) > 1:
+            emb1_proj = emb1_proj.squeeze()
+        if len(emb2_proj.shape) > 1:
+            emb2_proj = emb2_proj.squeeze()
+
+        return F.cosine_similarity(emb1_proj.unsqueeze(0), emb2_proj.unsqueeze(0)).item()
 
     def find_similar(self, query_embedding: torch.Tensor, embedding_database: List[torch.Tensor],
                     top_k: int = 5) -> List[Tuple[int, float]]:

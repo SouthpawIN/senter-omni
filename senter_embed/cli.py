@@ -177,7 +177,11 @@ def run_db_command(args):
 
 def run_demo():
     """Run the embedding demo"""
-    from ..simple_embedding_demo import demo_multimodal_embeddings
+    import sys
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+    from simple_embedding_demo import demo_multimodal_embeddings
 
     print("🎭 Running Senter-Embed Demo")
     demo_multimodal_embeddings()

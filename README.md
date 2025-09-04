@@ -2,16 +2,23 @@
 
 <div align="center">
 
-![Senter Banner](assets/senter-banner.svg)
+<img src="assets/senter-banner.svg" alt="Senter-Omni Banner" width="100%">
+
+</div>
+
+<div align="center">
+
+# 🎭 SENTER-OMNI
+
+**THE WORLD'S FIRST TRULY OMNIMODAL AI ASSISTANT**  
+**WITH TRUE STREAMING OUTPUT AND CROSS-MODAL EMBEDDINGS**
+
+*Built by Chris at Alignment Lab AI*
 
 ![Senter Logo](https://img.shields.io/badge/Senter-Omni-4B%20Parameters-gold?style=for-the-badge&logo=circle&logoColor=teal)
 ![License](https://img.shields.io/badge/License-Apache%202.0-green?style=for-the-badge)
 ![Context](https://img.shields.io/badge/Context%20Length-128K%20Tokens-blue?style=for-the-badge)
 ![Multimodal](https://img.shields.io/badge/Multimodal-Text%20%7C%20Image%20%7C%20Audio%20%7C%20Video-purple?style=for-the-badge)
-
-**The world's first truly omnimodal AI assistant with TRUE streaming output and cross-modal embeddings**
-
-*Built by Chris at Alignment Lab AI*
 
 </div>
 
@@ -214,14 +221,19 @@ pip install -r requirements.txt
 ```
 
 ### **3. Download Model**
-The quantized model is too large for GitHub. Download instructions:
+The quantized model (3.5GB) is hosted on Hugging Face due to GitHub's 100MB file limit:
 
 ```bash
-# Option 1: Use the base model (will download automatically)
+# Option 1: Download from Hugging Face (Recommended)
+git lfs install
+git clone https://huggingface.co/SouthpawIN/senter-omni-model
+cp -r senter-omni-model/* ./senter_omni_128k/
+
+# Option 2: Use base model (will download automatically)
 # The system will fall back to unsloth/Qwen2.5-Omni-3B
 
-# Option 2: Download quantized model manually
-# Contact repository maintainer for model access
+# Option 3: Manual download
+# Download from: https://huggingface.co/SouthpawIN/senter-omni-model
 ```
 
 ### **4. Run Demo**
@@ -306,26 +318,6 @@ context = client.retrieve_context("nature scenes")
 
 ---
 
-## 🎨 **Senter Branding**
-
-Senter-Omni features a distinctive visual identity:
-
-**🎨 Color Palette:**
-- **Primary Gold**: Rich, brushed metallic gold (#D4AF37)
-- **Accent Teal**: Deep emerald/teal green (#008B8B)
-- **Background**: Dark textured black (#1A1A1A)
-- **Highlights**: Golden specks and shimmer effects
-
-**🔷 Logo Elements:**
-- **Circle**: Outer golden ring representing completeness
-- **Triangle**: Inner geometric structure for stability
-- **Marbled Green**: Organic, flowing patterns for creativity
-
-**✨ Aesthetic:**
-- Modern elegance with geometric precision
-- Organic textures with structured forms
-- Luxurious materials with sophisticated depth
-- Ethereal quality with grounded functionality
 
 ---
 
@@ -430,11 +422,11 @@ This project uses:
 
 <div align="center">
 
-**🎭 Experience the future of multimodal AI with Senter-Omni**
+<img src="assets/senter-social-card.svg" alt="Senter-Omni Social Card" width="100%">
+
+**🎭 EXPERIENCE THE FUTURE OF MULTIMODAL AI WITH SENTER-OMNI**
 
 *Built with ❤️ by Chris at Alignment Lab AI*
-
-![Senter Social Card](assets/senter-social-card.svg)
 
 ![Senter Banner](https://img.shields.io/badge/Ready%20to%20Explore%3F-Run%20senter_omni_demo.py-gold?style=for-the-badge&logo=play&logoColor=teal)
 

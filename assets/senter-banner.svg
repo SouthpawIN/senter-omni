@@ -31,6 +31,15 @@
       <path d="M0,0 Q20,-10 40,10 T80,0 Q60,20 40,40 T0,60 Q20,50 40,70 T80,60" 
             fill="#00FFFF" opacity="0.3"/>
     </pattern>
+    
+    <!-- Block lettering effect -->
+    <filter id="blockEffect" x="-50%" y="-50%" width="200%" height="200%">
+      <feMorphology operator="dilate" radius="2"/>
+      <feGaussianBlur stdDeviation="1"/>
+      <feOffset dx="2" dy="2" result="offset"/>
+      <feFlood flood-color="#000000" flood-opacity="0.8"/>
+      <feComposite in="offset" operator="in"/>
+    </filter>
   </defs>
   
   <!-- Dark textured background -->
@@ -61,66 +70,80 @@
     <path d="M0,-30 L26,15 L-26,15 Z" fill="url(#marbledPattern)"/>
   </g>
   
-  <!-- Main Title -->
-  <text x="350" y="120" font-family="Arial, sans-serif" font-size="48" font-weight="bold" 
-        fill="url(#goldGradient)">Senter-Omni</text>
-  
-  <!-- Subtitle -->
-  <text x="350" y="160" font-family="Arial, sans-serif" font-size="24" 
-        fill="url(#tealGradient)">Multimodal AI Assistant</text>
-  
-  <!-- Feature badges -->
-  <g transform="translate(350, 180)">
-    <!-- 4B Parameters badge -->
-    <rect x="0" y="0" width="140" height="30" rx="15" fill="url(#goldGradient)" opacity="0.2"/>
-    <text x="70" y="20" font-family="Arial, sans-serif" font-size="14" font-weight="bold" 
-          fill="url(#goldGradient)" text-anchor="middle">4B Parameters</text>
+  <!-- Block Lettering Title with Negative Effect -->
+  <g transform="translate(350, 100)">
+    <!-- Background block for negative effect -->
+    <rect x="-10" y="-10" width="800" height="80" fill="#1A1A1A" opacity="0.9" rx="10"/>
     
-    <!-- 128K Context badge -->
-    <rect x="160" y="0" width="120" height="30" rx="15" fill="url(#tealGradient)" opacity="0.2"/>
-    <text x="220" y="20" font-family="Arial, sans-serif" font-size="14" font-weight="bold" 
-          fill="url(#tealGradient)" text-anchor="middle">128K Context</text>
+    <!-- Main Title with block effect -->
+    <text x="390" y="45" font-family="Arial Black, sans-serif" font-size="48" font-weight="900" 
+          fill="url(#goldGradient)" text-anchor="middle" filter="url(#blockEffect)">SENTER-OMNI</text>
     
-    <!-- Apache 2.0 badge -->
-    <rect x="300" y="0" width="100" height="30" rx="15" fill="url(#goldGradient)" opacity="0.2"/>
-    <text x="350" y="20" font-family="Arial, sans-serif" font-size="14" font-weight="bold" 
-          fill="url(#goldGradient)" text-anchor="middle">Apache 2.0</text>
-    
-    <!-- Streaming badge -->
-    <rect x="420" y="0" width="100" height="30" rx="15" fill="url(#tealGradient)" opacity="0.2"/>
-    <text x="470" y="20" font-family="Arial, sans-serif" font-size="14" font-weight="bold" 
-          fill="url(#tealGradient)" text-anchor="middle">TRUE Streaming</text>
+    <!-- Subtitle with block effect -->
+    <text x="390" y="75" font-family="Arial, sans-serif" font-size="18" font-weight="bold" 
+          fill="url(#tealGradient)" text-anchor="middle" filter="url(#blockEffect)">MULTIMODAL AI ASSISTANT</text>
   </g>
   
-  <!-- Modality icons -->
-  <g transform="translate(350, 230)">
+  <!-- Feature badges with block styling -->
+  <g transform="translate(350, 200)">
+    <!-- 4B Parameters badge -->
+    <rect x="0" y="0" width="140" height="35" rx="17" fill="url(#goldGradient)" opacity="0.2" 
+          stroke="url(#goldGradient)" stroke-width="2"/>
+    <text x="70" y="22" font-family="Arial Black, sans-serif" font-size="14" font-weight="900" 
+          fill="url(#goldGradient)" text-anchor="middle">4B PARAMETERS</text>
+    
+    <!-- 128K Context badge -->
+    <rect x="160" y="0" width="120" height="35" rx="17" fill="url(#tealGradient)" opacity="0.2" 
+          stroke="url(#tealGradient)" stroke-width="2"/>
+    <text x="220" y="22" font-family="Arial Black, sans-serif" font-size="14" font-weight="900" 
+          fill="url(#tealGradient)" text-anchor="middle">128K CONTEXT</text>
+    
+    <!-- Apache 2.0 badge -->
+    <rect x="300" y="0" width="100" height="35" rx="17" fill="url(#goldGradient)" opacity="0.2" 
+          stroke="url(#goldGradient)" stroke-width="2"/>
+    <text x="350" y="22" font-family="Arial Black, sans-serif" font-size="14" font-weight="900" 
+          fill="url(#goldGradient)" text-anchor="middle">APACHE 2.0</text>
+    
+    <!-- Streaming badge -->
+    <rect x="420" y="0" width="120" height="35" rx="17" fill="url(#tealGradient)" opacity="0.2" 
+          stroke="url(#tealGradient)" stroke-width="2"/>
+    <text x="480" y="22" font-family="Arial Black, sans-serif" font-size="14" font-weight="900" 
+          fill="url(#tealGradient)" text-anchor="middle">TRUE STREAMING</text>
+  </g>
+  
+  <!-- Modality icons with block styling -->
+  <g transform="translate(350, 250)">
     <!-- Text icon -->
-    <rect x="0" y="0" width="40" height="40" rx="8" fill="url(#goldGradient)" opacity="0.3"/>
-    <text x="20" y="25" font-family="Arial, sans-serif" font-size="16" font-weight="bold" 
+    <rect x="0" y="0" width="45" height="45" rx="8" fill="url(#goldGradient)" opacity="0.3" 
+          stroke="url(#goldGradient)" stroke-width="2"/>
+    <text x="22" y="28" font-family="Arial Black, sans-serif" font-size="18" font-weight="900" 
           fill="url(#goldGradient)" text-anchor="middle">T</text>
-    <text x="50" y="25" font-family="Arial, sans-serif" font-size="12" 
-          fill="url(#tealGradient)">Text</text>
+    <text x="55" y="28" font-family="Arial Black, sans-serif" font-size="12" font-weight="900" 
+          fill="url(#tealGradient)">TEXT</text>
     
     <!-- Image icon -->
-    <rect x="100" y="0" width="40" height="40" rx="8" fill="url(#tealGradient)" opacity="0.3"/>
-    <text x="120" y="25" font-family="Arial, sans-serif" font-size="16" font-weight="bold" 
+    <rect x="120" y="0" width="45" height="45" rx="8" fill="url(#tealGradient)" opacity="0.3" 
+          stroke="url(#tealGradient)" stroke-width="2"/>
+    <text x="142" y="28" font-family="Arial Black, sans-serif" font-size="18" font-weight="900" 
           fill="url(#tealGradient)" text-anchor="middle">I</text>
-    <text x="150" y="25" font-family="Arial, sans-serif" font-size="12" 
-          fill="url(#goldGradient)">Image</text>
+    <text x="175" y="28" font-family="Arial Black, sans-serif" font-size="12" font-weight="900" 
+          fill="url(#goldGradient)">IMAGE</text>
     
     <!-- Audio icon -->
-    <rect x="200" y="0" width="40" height="40" rx="8" fill="url(#goldGradient)" opacity="0.3"/>
-    <text x="220" y="25" font-family="Arial, sans-serif" font-size="16" font-weight="bold" 
+    <rect x="240" y="0" width="45" height="45" rx="8" fill="url(#goldGradient)" opacity="0.3" 
+          stroke="url(#goldGradient)" stroke-width="2"/>
+    <text x="262" y="28" font-family="Arial Black, sans-serif" font-size="18" font-weight="900" 
           fill="url(#goldGradient)" text-anchor="middle">A</text>
-    <text x="250" y="25" font-family="Arial, sans-serif" font-size="12" 
-          fill="url(#tealGradient)">Audio</text>
+    <text x="295" y="28" font-family="Arial Black, sans-serif" font-size="12" font-weight="900" 
+          fill="url(#tealGradient)">AUDIO</text>
     
     <!-- Video icon -->
-    <rect x="300" y="0" width="40" height="40" rx="8" fill="url(#tealGradient)" opacity="0.3"/>
-    <text x="320" y="25" font-family="Arial, sans-serif" font-size="16" font-weight="bold" 
+    <rect x="360" y="0" width="45" height="45" rx="8" fill="url(#tealGradient)" opacity="0.3" 
+          stroke="url(#tealGradient)" stroke-width="2"/>
+    <text x="382" y="28" font-family="Arial Black, sans-serif" font-size="18" font-weight="900" 
           fill="url(#tealGradient)" text-anchor="middle">V</text>
-    <text x="350" y="25" font-family="Arial, sans-serif" font-size="12" 
-          fill="url(#goldGradient)">Video</text>
+    <text x="415" y="28" font-family="Arial Black, sans-serif" font-size="12" font-weight="900" 
+          fill="url(#goldGradient)">VIDEO</text>
   </g>
   
   <!-- Decorative flowing elements -->
@@ -131,13 +154,14 @@
   <path d="M800,150 Q900,130 1000,150 T1200,150" stroke="url(#tealGradient)" stroke-width="2" 
         fill="none" opacity="0.5"/>
   
-  <!-- Performance metrics -->
+  <!-- Performance metrics with block styling -->
   <g transform="translate(800, 200)">
-    <text x="0" y="0" font-family="Arial, sans-serif" font-size="16" font-weight="bold" 
-          fill="url(#goldGradient)">⚡ Time to First Token: 0.234s</text>
-    <text x="0" y="20" font-family="Arial, sans-serif" font-size="14" 
-          fill="url(#tealGradient)">🎭 Cross-Modal Embeddings</text>
-    <text x="0" y="40" font-family="Arial, sans-serif" font-size="14" 
-          fill="url(#goldGradient)">🔓 Uncensored & Open Source</text>
+    <rect x="-10" y="-10" width="350" height="80" fill="#1A1A1A" opacity="0.9" rx="10"/>
+    <text x="165" y="15" font-family="Arial Black, sans-serif" font-size="16" font-weight="900" 
+          fill="url(#goldGradient)" text-anchor="middle">⚡ TIME TO FIRST TOKEN: 0.234S</text>
+    <text x="165" y="35" font-family="Arial Black, sans-serif" font-size="14" font-weight="900" 
+          fill="url(#tealGradient)" text-anchor="middle">🎭 CROSS-MODAL EMBEDDINGS</text>
+    <text x="165" y="55" font-family="Arial Black, sans-serif" font-size="14" font-weight="900" 
+          fill="url(#goldGradient)" text-anchor="middle">🔓 UNCENSORED & OPEN SOURCE</text>
   </g>
 </svg>

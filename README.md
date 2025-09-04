@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<img src="assets/senter-banner.svg" alt="Senter-Omni Banner" width="100%">
+<img src="assets/senter-banner-simple.svg" alt="Senter-Omni Banner" width="100%">
 
 </div>
 

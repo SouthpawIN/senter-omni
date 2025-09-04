@@ -1,0 +1,148 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gold gradient -->
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#D4AF37;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B8860B;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Teal gradient -->
+    <linearGradient id="tealGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#008B8B;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#20B2AA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#006666;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Dark background with texture -->
+    <pattern id="darkTexture" patternUnits="userSpaceOnUse" width="6" height="6">
+      <rect width="6" height="6" fill="#1A1A1A"/>
+      <circle cx="1.5" cy="1.5" r="0.8" fill="#2A2A2A" opacity="0.3"/>
+      <circle cx="4.5" cy="4.5" r="0.4" fill="#2A2A2A" opacity="0.2"/>
+    </pattern>
+    
+    <!-- Marbled pattern for inner triangle -->
+    <pattern id="marbledPattern" patternUnits="userSpaceOnUse" width="80" height="80">
+      <rect width="80" height="80" fill="#006666"/>
+      <path d="M16,16 Q32,8 48,24 T80,16 Q64,32 48,48 T16,64 Q32,56 48,72 T80,64" 
+            fill="#008B8B" opacity="0.7"/>
+      <path d="M8,8 Q24,0 40,16 T72,8 Q56,24 40,40 T8,56 Q24,48 40,64 T72,56" 
+            fill="#20B2AA" opacity="0.5"/>
+      <path d="M0,0 Q16,-8 32,8 T64,0 Q48,16 32,32 T0,48 Q16,40 32,56 T64,48" 
+            fill="#00FFFF" opacity="0.3"/>
+    </pattern>
+    
+    <!-- Flowing wave pattern -->
+    <pattern id="wavePattern" patternUnits="userSpaceOnUse" width="200" height="100">
+      <path d="M0,50 Q50,20 100,50 T200,50" stroke="url(#tealGradient)" stroke-width="3" 
+            fill="none" opacity="0.4"/>
+      <path d="M0,60 Q50,30 100,60 T200,60" stroke="url(#goldGradient)" stroke-width="2" 
+            fill="none" opacity="0.3"/>
+    </pattern>
+  </defs>
+  
+  <!-- Dark textured background -->
+  <rect width="1200" height="630" fill="url(#darkTexture)"/>
+  
+  <!-- Golden specks scattered across background -->
+  <circle cx="100" cy="80" r="3" fill="#FFD700" opacity="0.8"/>
+  <circle cx="300" cy="120" r="2" fill="#FFD700" opacity="0.6"/>
+  <circle cx="500" cy="60" r="2.5" fill="#FFD700" opacity="0.7"/>
+  <circle cx="700" cy="100" r="1.5" fill="#FFD700" opacity="0.5"/>
+  <circle cx="900" cy="80" r="3" fill="#FFD700" opacity="0.9"/>
+  <circle cx="1100" cy="140" r="2" fill="#FFD700" opacity="0.6"/>
+  <circle cx="200" cy="300" r="2.5" fill="#FFD700" opacity="0.7"/>
+  <circle cx="400" cy="280" r="2" fill="#FFD700" opacity="0.8"/>
+  <circle cx="600" cy="320" r="1.5" fill="#FFD700" opacity="0.5"/>
+  <circle cx="800" cy="300" r="3" fill="#FFD700" opacity="0.6"/>
+  <circle cx="1000" cy="280" r="2" fill="#FFD700" opacity="0.9"/>
+  <circle cx="150" cy="500" r="2" fill="#FFD700" opacity="0.7"/>
+  <circle cx="350" cy="480" r="2.5" fill="#FFD700" opacity="0.8"/>
+  <circle cx="550" cy="520" r="1.5" fill="#FFD700" opacity="0.6"/>
+  <circle cx="750" cy="500" r="2" fill="#FFD700" opacity="0.9"/>
+  <circle cx="950" cy="480" r="2.5" fill="#FFD700" opacity="0.7"/>
+  
+  <!-- Flowing wave elements -->
+  <rect x="0" y="200" width="1200" height="100" fill="url(#wavePattern)" opacity="0.3"/>
+  <rect x="0" y="400" width="1200" height="80" fill="url(#wavePattern)" opacity="0.2"/>
+  
+  <!-- Senter Logo (Large) -->
+  <g transform="translate(200, 315)">
+    <!-- Outer golden circle -->
+    <circle cx="0" cy="0" r="80" fill="none" stroke="url(#goldGradient)" stroke-width="12"/>
+    
+    <!-- Golden triangle -->
+    <path d="M0,-60 L52,30 L-52,30 Z" fill="none" stroke="url(#goldGradient)" stroke-width="10"/>
+    
+    <!-- Inner marbled triangle -->
+    <path d="M0,-40 L35,20 L-35,20 Z" fill="url(#marbledPattern)"/>
+  </g>
+  
+  <!-- Main Title -->
+  <text x="450" y="200" font-family="Arial, sans-serif" font-size="72" font-weight="bold" 
+        fill="url(#goldGradient)">Senter-Omni</text>
+  
+  <!-- Subtitle -->
+  <text x="450" y="260" font-family="Arial, sans-serif" font-size="36" 
+        fill="url(#tealGradient)">Multimodal AI Assistant</text>
+  
+  <!-- Key Features -->
+  <g transform="translate(450, 300)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="24" font-weight="bold" 
+          fill="url(#goldGradient)">🎭 4B Parameters • 128K Context • Apache 2.0</text>
+    <text x="0" y="35" font-family="Arial, sans-serif" font-size="20" 
+          fill="url(#tealGradient)">⚡ TRUE Streaming • 🔍 Cross-Modal Embeddings</text>
+    <text x="0" y="70" font-family="Arial, sans-serif" font-size="18" 
+          fill="url(#goldGradient)">Text • Image • Audio • Video • Uncensored</text>
+  </g>
+  
+  <!-- Performance highlight -->
+  <g transform="translate(450, 420)">
+    <rect x="0" y="0" width="600" height="80" rx="20" fill="url(#goldGradient)" opacity="0.1" 
+          stroke="url(#goldGradient)" stroke-width="2"/>
+    <text x="300" y="30" font-family="Arial, sans-serif" font-size="20" font-weight="bold" 
+          fill="url(#goldGradient)" text-anchor="middle">⚡ Time to First Token: 0.234s</text>
+    <text x="300" y="55" font-family="Arial, sans-serif" font-size="16" 
+          fill="url(#tealGradient)" text-anchor="middle">Real-time streaming with measurable performance</text>
+  </g>
+  
+  <!-- GitHub link -->
+  <g transform="translate(450, 530)">
+    <rect x="0" y="0" width="300" height="50" rx="25" fill="url(#tealGradient)" opacity="0.2" 
+          stroke="url(#tealGradient)" stroke-width="2"/>
+    <text x="150" y="32" font-family="Arial, sans-serif" font-size="18" font-weight="bold" 
+          fill="url(#tealGradient)" text-anchor="middle">github.com/SouthpawIN/senter-omni</text>
+  </g>
+  
+  <!-- Decorative elements -->
+  <g transform="translate(1000, 100)">
+    <!-- Modality icons arranged in a circle -->
+    <g transform="translate(100, 100)">
+      <!-- Text -->
+      <circle cx="0" cy="-60" r="25" fill="url(#goldGradient)" opacity="0.3"/>
+      <text x="0" y="-55" font-family="Arial, sans-serif" font-size="16" font-weight="bold" 
+            fill="url(#goldGradient)" text-anchor="middle">T</text>
+      
+      <!-- Image -->
+      <circle cx="42" cy="-42" r="25" fill="url(#tealGradient)" opacity="0.3"/>
+      <text x="42" y="-37" font-family="Arial, sans-serif" font-size="16" font-weight="bold" 
+            fill="url(#tealGradient)" text-anchor="middle">I</text>
+      
+      <!-- Audio -->
+      <circle cx="60" cy="0" r="25" fill="url(#goldGradient)" opacity="0.3"/>
+      <text x="60" y="5" font-family="Arial, sans-serif" font-size="16" font-weight="bold" 
+            fill="url(#goldGradient)" text-anchor="middle">A</text>
+      
+      <!-- Video -->
+      <circle cx="42" cy="42" r="25" fill="url(#tealGradient)" opacity="0.3"/>
+      <text x="42" y="47" font-family="Arial, sans-serif" font-size="16" font-weight="bold" 
+            fill="url(#tealGradient)" text-anchor="middle">V</text>
+      
+      <!-- Center connection lines -->
+      <line x1="0" y1="-60" x2="0" y2="0" stroke="url(#goldGradient)" stroke-width="2" opacity="0.4"/>
+      <line x1="42" y1="-42" x2="0" y2="0" stroke="url(#tealGradient)" stroke-width="2" opacity="0.4"/>
+      <line x1="60" y1="0" x2="0" y2="0" stroke="url(#goldGradient)" stroke-width="2" opacity="0.4"/>
+      <line x1="42" y1="42" x2="0" y2="0" stroke="url(#tealGradient)" stroke-width="2" opacity="0.4"/>
+    </g>
+  </g>
+</svg>

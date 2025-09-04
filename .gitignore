@@ -29,6 +29,10 @@ senter_omni_128k/
 *.pth
 *.bin
 
+# Training data (too large for git)
+training_data/
+*.jsonl
+
 # IDE files
 .vscode/
 .idea/

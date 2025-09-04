@@ -200,13 +200,6 @@ cp -r senter-omni-model/* ./senter_omni_128k/
 # Download from: https://huggingface.co/SouthpawIN/senter-omni-model
 ```
 
-### **4. Run Demo**
-```bash
-python senter_omni_demo.py
-```
-
----
-
 ## 🎮 **Interactive Demo**
 
 The comprehensive demo showcases all capabilities:

@@ -1,9 +1,6 @@
 <div align="center">
 
-<video width="100%" controls playsinline preload="metadata">
-  <source src="https://media.githubusercontent.com/media/SouthpawIN/senter-omni/main/senter-animated-banner.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+![Senter-Omni Animated Banner](senter-animated-banner.gif)
 
 </div>
 

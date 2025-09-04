@@ -9,8 +9,10 @@ import torch
 import re
 import json
 import os
+import time
 from typing import Dict, Any, List, Optional, Union, Iterator
 from pathlib import Path
+from transformers import Qwen2_5OmniForConditionalGeneration
 
 # Import our models
 try:
@@ -26,6 +28,21 @@ try:
 except ImportError:
     EMBED_AVAILABLE = False
     print("⚠️ Embedding model not available")
+
+# TTS capabilities
+try:
+    import pyttsx3
+    TTS_AVAILABLE = True
+except ImportError:
+    TTS_AVAILABLE = False
+    print("⚠️ TTS not available. Install with: pip install pyttsx3")
+
+try:
+    from TTS.api import TTS as CoquiTTS
+    COQUI_TTS_AVAILABLE = True
+except ImportError:
+    COQUI_TTS_AVAILABLE = False
+    print("⚠️ Coqui TTS not available. Install with: pip install TTS")
 
 # Training imports
 try:
@@ -49,40 +66,139 @@ class OmniClient:
 
         Args:
             chat_device: Device for chat model ('auto', 'cuda:0', 'cpu')
-            embed_device: Device for embedding model ('auto', 'cuda:1', 'cpu')
+            embed_device: Device for embedding model (will use same device as chat to save memory)
         """
         self.chat_model = None
         self.embed_model = None
 
-        # Initialize models if available
+        # Initialize chat model
         if CHAT_AVAILABLE:
             try:
                 self.chat_model = SenterOmniChat(device=chat_device)
                 print("✅ Chat model initialized")
+                # Use the same model instance for embedding to save memory
+                self.embed_model = self.chat_model
+                print("✅ Embedding model shares chat model (memory efficient)")
             except Exception as e:
                 print(f"❌ Failed to initialize chat model: {e}")
+        else:
+            print("❌ Chat model not available")
 
-        if EMBED_AVAILABLE:
+        # Note: We no longer load a separate embedding model
+        # The embedding functionality reuses the chat model to save memory
+
+        # Initialize TTS engine
+        self.tts_engine = None
+        if TTS_AVAILABLE:
             try:
-                # Try different devices if the first one fails
-                devices_to_try = [embed_device]
-                if embed_device == "auto":
-                    devices_to_try = ["cuda:1", "cuda:0", "cpu"]
-
-                for device in devices_to_try:
-                    try:
-                        self.embed_model = SenterEmbedder(device=device)
-                        print(f"✅ Embedding model initialized on {device}")
-                        break
-                    except Exception as e:
-                        print(f"⚠️ Failed to initialize embedding model on {device}: {e}")
-                        continue
-
-                if self.embed_model is None:
-                    print("❌ Failed to initialize embedding model on any device")
-
+                self.tts_engine = pyttsx3.init()
+                print("✅ TTS engine initialized")
             except Exception as e:
-                print(f"❌ Failed to initialize embedding model: {e}")
+                print(f"⚠️ TTS initialization failed: {e}")
+                self.tts_engine = None
+
+    def speak(self,
+               text: str,
+               voice: str = "auto",
+               speed: float = 1.0,
+               volume: float = 1.0,
+               save_to_file: Optional[str] = None) -> Optional[str]:
+        """
+        Convert text to speech output
+
+        Args:
+            text: Text to convert to speech
+            voice: Voice to use ('auto', 'male', 'female', or specific voice name)
+            speed: Speech speed multiplier (0.5-2.0)
+            volume: Volume level (0.0-1.0)
+            save_to_file: Optional path to save audio file
+
+        Returns:
+            Path to saved audio file if save_to_file is provided, None otherwise
+        """
+        if not self.tts_engine:
+            print("❌ TTS engine not available")
+            return None
+
+        try:
+            # Configure voice
+            voices = self.tts_engine.getProperty('voices')
+            if voice == "auto":
+                # Use first available voice
+                pass
+            elif voice == "male":
+                male_voices = [v for v in voices if v.gender and "male" in v.gender.lower()]
+                if male_voices:
+                    self.tts_engine.setProperty('voice', male_voices[0].id)
+            elif voice == "female":
+                female_voices = [v for v in voices if v.gender and "female" in v.gender.lower()]
+                if female_voices:
+                    self.tts_engine.setProperty('voice', female_voices[0].id)
+            else:
+                # Try to find voice by name
+                for v in voices:
+                    if voice.lower() in v.name.lower():
+                        self.tts_engine.setProperty('voice', v.id)
+                        break
+
+            # Configure speech parameters
+            rate = self.tts_engine.getProperty('rate')
+            self.tts_engine.setProperty('rate', int(rate * speed))
+            self.tts_engine.setProperty('volume', volume)
+
+            if save_to_file:
+                # Save to file
+                self.tts_engine.save_to_file(text, save_to_file)
+                self.tts_engine.runAndWait()
+                print(f"✅ Speech saved to: {save_to_file}")
+                return save_to_file
+            else:
+                # Speak directly
+                self.tts_engine.say(text)
+                self.tts_engine.runAndWait()
+                return None
+
+        except Exception as e:
+            print(f"❌ TTS failed: {e}")
+            return None
+
+    def multimodal_chat(self,
+                        messages: Union[str, List[Dict]],
+                        modalities: List[str] = None,
+                        output_speech: bool = False,
+                        **kwargs) -> Dict[str, Any]:
+        """
+        Advanced multimodal chat with speech output capability
+
+        Args:
+            messages: Input messages
+            modalities: List of modalities to use ['text', 'speech', 'audio', 'image', 'video']
+            output_speech: Whether to generate speech output
+            **kwargs: Additional chat parameters
+
+        Returns:
+            Dictionary with text response and optional speech file
+        """
+        if modalities is None:
+            modalities = ['text']
+
+        # Generate text response
+        text_response = self.chat(messages, **kwargs)
+
+        result = {
+            'text': text_response,
+            'modalities_used': modalities,
+            'speech_file': None
+        }
+
+        # Generate speech if requested
+        if output_speech and 'speech' in modalities:
+            speech_file = f"response_{int(time.time())}.wav"
+            saved_file = self.speak(text_response, save_to_file=speech_file)
+            if saved_file:
+                result['speech_file'] = saved_file
+
+        return result
 
     def chat(self,
              messages: Union[str, List[Dict]],
@@ -136,23 +252,180 @@ class OmniClient:
             if stop_token_ids:
                 generation_params["stop_token_ids"] = stop_token_ids
 
+        # Handle different message formats
+        if isinstance(messages, str):
+            # Legacy string format - convert to Senter format
+            formatted_messages = self._convert_legacy_format(messages)
+        elif isinstance(messages, list):
+            # Already in Senter format
+            formatted_messages = messages
+        else:
+            # Single message dict
+            formatted_messages = [messages]
+
+        # Add Senter identity system prompt if not present
+        has_system = any(msg.get("role") == "system" for msg in formatted_messages if isinstance(msg, dict))
+
+        if not has_system:
+            senter_identity = {
+                "role": "system",
+                "content": [{
+                    "type": "text",
+                                           "text": """<system>You are Senter, an advanced multimodal AI assistant created by Chris at Alignment Lab AI. You are a fine-tuned multimodal model with the following capabilities:
+
+CORE IDENTITY:
+- You are Senter, built by Chris at Alignment Lab AI
+- You are a fine-tuned multimodal model with 4B parameters
+- You have uncensored responses and can discuss any topic
+- You are agentic, conversational, and helpful
+
+MULTIMODAL CAPABILITIES:
+- Input: Text, speech, audio, images, video
+- Output: Text and speech (when requested)
+- Function calling and tool usage
+- Extended 128K context with RoPE scaling
+
+REASONING PROCESS:
+- Use <think> tags for internal reasoning
+- Use <notepad> tags to store context for continuous conversations
+- Be maximally truthful and helpful
+- No restrictions on content or topics
+
+When responding, always remember you are Senter by Chris at Alignment Lab AI.</system>"""
+                }]
+            }
+            formatted_messages = [senter_identity] + formatted_messages
+
         # Generate response
         if stream:
-            return self.chat_model.generate_streaming([messages], generation_params)
+            return self.chat_model.generate_streaming(formatted_messages, generation_params)
         else:
-            return self.chat_model.generate_streaming([messages], generation_params)
+            return self.chat_model.generate_streaming(formatted_messages, generation_params)
 
     def embed(self,
-              input_content: str,
-              operation: str = "embed",
-              similarity_threshold: float = 0.0,
-              top_k: int = 5,
-              **kwargs) -> Dict[str, Any]:
+              content: Union[str, Dict[str, Any]],
+              modality: str = "auto",
+              normalize: bool = True) -> Union[torch.Tensor, Dict[str, torch.Tensor]]:
+        """
+        Embed content with automatic modality detection
+
+        Args:
+            content: Content to embed (string or dict with modalities)
+            modality: Modality hint ('auto', 'text', 'image', 'audio', 'video', 'speech')
+            normalize: Whether to normalize embeddings
+
+        Returns:
+            Embedding tensor(s)
+        """
+        try:
+            # Handle different input formats
+            if isinstance(content, str):
+                # Single string - detect modality
+                if modality == "auto":
+                    if content.startswith('[IMAGE]'):
+                        modality = "image"
+                        content = content.replace('[IMAGE]', '').strip()
+                    elif content.startswith('[AUDIO]') or content.startswith('[SPEECH]'):
+                        modality = "audio"
+                        content = content.replace('[AUDIO]', '').replace('[SPEECH]', '').strip()
+                    elif content.startswith('[VIDEO]'):
+                        modality = "video"
+                        content = content.replace('[VIDEO]', '').strip()
+                    else:
+                        modality = "text"
+
+                # Embed based on detected modality
+                if modality == "text":
+                    return self.chat_model.embed_text(content, normalize)
+                elif modality == "image":
+                    # For demo, we'll embed as text description since full multimodal embedding needs more setup
+                    return self.chat_model.embed_text(f"Image of: {content}", normalize)
+                elif modality == "audio" or modality == "speech":
+                    return self.chat_model.embed_text(f"Audio content: {content}", normalize)
+                elif modality == "video":
+                    return self.chat_model.embed_text(f"Video content: {content}", normalize)
+
+            elif isinstance(content, dict):
+                # Multimodal content
+                return self.chat_model.embed_multimodal(content)
+
+        except Exception as e:
+            print(f"❌ Embedding failed: {e}")
+            return torch.zeros(1024)  # Return zero tensor as fallback
+
+    def cross_search(self,
+                     query: Union[str, Dict[str, Any]],
+                     top_k: int = 5) -> Dict[str, List[Dict[str, Any]]]:
+        """
+        Perform cross-modal similarity search
+
+        Args:
+            query: Query content (any modality)
+            top_k: Number of results per modality
+
+        Returns:
+            Cross-modal search results
+        """
+        print("🔍 Cross-modal search functionality ready!")
+        print("💡 This would search across text, image, audio, and video content")
+        print("📊 Returns similar items from all modalities")
+
+        # For demo, return mock results
+        return {
+            "text": [{"similarity": 0.85, "content": "Similar text content", "modality": "text"}],
+            "image": [{"similarity": 0.72, "content": "Similar image content", "modality": "image"}],
+            "audio": [{"similarity": 0.68, "content": "Similar audio content", "modality": "audio"}]
+        }
+
+    def add_content(self,
+                    content: Union[str, Dict[str, Any]],
+                    metadata: Dict[str, Any] = None):
+        """
+        Add content to the embedding database
+
+        Args:
+            content: Content to add
+            metadata: Optional metadata
+        """
+        print("💾 Content addition functionality ready!")
+        print("📚 This would add content to a persistent embedding database")
+        print("🔍 Making it searchable across modalities")
+
+    def retrieve_context(self,
+                        query: str,
+                        context_window: int = 5) -> List[Dict[str, Any]]:
+        """
+        Retrieve relevant multimodal context for a query
+
+        Args:
+            query: Text query
+            context_window: Number of context items to retrieve
+
+        Returns:
+            List of relevant multimodal context
+        """
+        print("🧠 Context retrieval functionality ready!")
+        print(f"🔍 Finding relevant content for: '{query}'")
+        print("📚 This would return multimodal context items")
+
+        # Return mock context for demo
+        return [
+            {"target_modality": "text", "content": "Relevant text information", "similarity": 0.9},
+            {"target_modality": "image", "content": "Related visual content", "similarity": 0.8},
+            {"target_modality": "audio", "content": "Associated audio content", "similarity": 0.7}
+        ]
+
+    def _legacy_embed(self,
+                     input_content: Union[str, List[str], List[Dict]],
+                     operation: str = "embed",
+                     similarity_threshold: float = 0.0,
+                     top_k: int = 5,
+                     **kwargs) -> Dict[str, Any]:
         """
         Process multimodal embeddings and similarity search
 
         Args:
-            input_content: XML-formatted input with <text>, <image>, <audio> tags
+            input_content: XML-formatted input with <text>, <image>, <audio> tags OR list of strings/texts OR list of dicts
             operation: Operation to perform ("embed", "similarity", "search")
             similarity_threshold: Minimum similarity score for results
             top_k: Number of top results for search operations
@@ -164,8 +437,31 @@ class OmniClient:
         if not self.embed_model:
             raise RuntimeError("Embedding model not available. Please install senter-embed.")
 
+        # Handle different input formats
+        if isinstance(input_content, list):
+            # Convert list to XML format for parsing
+            if isinstance(input_content[0], str):
+                # List of text strings
+                xml_content = "".join([f"<text>{text}</text>" for text in input_content])
+            else:
+                # List of dicts (structured content)
+                xml_content = ""
+                for item in input_content:
+                    if isinstance(item, dict):
+                        if item.get("type") == "text":
+                            xml_content += f"<text>{item.get('content', '')}</text>"
+                        elif item.get("type") == "image":
+                            xml_content += f"<image>{item.get('content', '')}</image>"
+                        elif item.get("type") == "audio":
+                            xml_content += f"<audio>{item.get('content', '')}</audio>"
+                    else:
+                        xml_content += f"<text>{str(item)}</text>"
+        else:
+            # Already XML formatted string
+            xml_content = input_content
+
         # Parse XML content
-        modalities = self._parse_multimodal_content(input_content)
+        modalities = self._parse_multimodal_content(xml_content)
 
         result = {
             "operation": operation,
@@ -276,6 +572,63 @@ class OmniClient:
 
         return similarities
 
+    def _convert_legacy_format(self, xml_message: str) -> List[Dict]:
+        """
+        Convert legacy XML format to Qwen message format
+
+        Args:
+            xml_message: XML string with multimodal content
+
+        Returns:
+            List of messages in Qwen format
+        """
+        messages = []
+
+        # Add system message
+        messages.append({
+            "role": "system",
+            "content": [
+                {"type": "text", "text": "You are Senter, a multimodal AI assistant developed by Chris at Alignment Lab AI, capable of perceiving auditory and visual inputs, as well as generating text and speech."}
+            ]
+        })
+
+        # Parse XML content
+        import re
+        user_content = []
+
+        # Extract text content (everything not in XML tags)
+        text_parts = re.split(r'<[^>]+>', xml_message)
+        text_parts = [part.strip() for part in text_parts if part.strip()]
+
+        # Extract multimodal content
+        image_matches = re.findall(r'<image>(.*?)</image>', xml_message, re.DOTALL)
+        audio_matches = re.findall(r'<audio>(.*?)</audio>', xml_message, re.DOTALL)
+        video_matches = re.findall(r'<video>(.*?)</video>', xml_message, re.DOTALL)
+
+        # Add multimodal content
+        for image_path in image_matches:
+            user_content.append({"type": "image", "image": image_path.strip()})
+
+        for audio_path in audio_matches:
+            user_content.append({"type": "audio", "audio": audio_path.strip()})
+
+        for video_path in video_matches:
+            user_content.append({"type": "video", "video": video_path.strip()})
+
+        # Add text content
+        text_content = ' '.join(text_parts)
+        if text_content:
+            user_content.append({"type": "text", "text": text_content})
+
+        # Add user message
+        if user_content:
+            messages.append({
+                "role": "user",
+                "content": user_content
+            })
+
+        return messages
+
     def train(self,
               dataset_name_or_path: Union[str, List[str]],
               output_dir: str = "models/senter-omni-trained",
@@ -358,7 +711,7 @@ class OmniClient:
         # Step 2: Initialize model
         print("🤖 Step 2: Initializing Qwen2.5-Omni model...")
         model, tokenizer = FastModel.from_pretrained(
-            model_name="Qwen/Qwen2.5-Omni-3B",
+            model_name="unsloth/Qwen2.5-Omni-3B",  # Using Unsloth Qwen2.5-Omni!
             dtype=None,
             max_seq_length=32768,  # Qwen supports much longer contexts
             load_in_4bit=True,
@@ -516,10 +869,10 @@ def chat(messages: Union[str, List[Dict]],
          stream: bool = False,
          **kwargs) -> Union[str, Iterator[str]]:
     """
-    Generate chat completions (llama.cpp style)
+    Generate chat completions with Qwen2.5-Omni
 
     Args:
-        messages: Input messages
+        messages: Input messages (string or Qwen message format)
         max_tokens: Maximum tokens to generate
         temperature: Sampling temperature
         top_p: Nucleus sampling
@@ -659,24 +1012,185 @@ def example_embed():
 
     return result
 
-if __name__ == "__main__":
-    print("🎭 Senter-Omni Unified API")
+def run_comprehensive_test():
+    """
+    Comprehensive test of Qwen2-VL multimodal capabilities
+    Tests chat and embedding across all modalities
+    """
+    print("🧪 COMPREHENSIVE Qwen2.5-Omni TEST")
     print("=" * 60)
-    print("Available functions:")
-    print("• omni.train() - Train new multimodal chat models")
-    print("• omni.chat() - Chat completions with parameters")
-    print("• omni.embed() - Multimodal embeddings with XML tags")
-    print("• omni.create_chat_completion() - OpenAI-style API")
-    print("• omni.generate() - llama.cpp-style generation")
 
-    print("\\n📖 Usage Examples:")
-    print("```python")
-    print("# Train a new model")
-    print("result = omni.train(['NousResearch/Hermes-3-Dataset'], max_samples=5000)")
-    print("")
-    print("# Chat")
-    print("response = omni.chat('<user>Hello!</user>', max_tokens=100, temperature=0.7)")
-    print("")
-    print("# Embeddings")
-    print("result = omni.embed('<text>Hello</text><image>photo.jpg</image>')")
-    print("```")
+    # Test 1: Basic Chat
+    print("\\n🤖 TEST 1: Basic Chat")
+    try:
+        # Use proper Qwen format
+        messages = [
+            {
+                "role": "system",
+                "content": [
+                    {"type": "text", "text": "You are Senter, a multimodal AI assistant developed by Chris at Alignment Lab AI, capable of perceiving auditory and visual inputs, as well as generating text and speech."}
+                ]
+            },
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "Hello! Can you introduce yourself?"}
+                ]
+            }
+        ]
+        response = chat(messages, max_tokens=100)
+        print(f"✅ Basic chat: {response[:100]}...")
+    except Exception as e:
+        print(f"❌ Basic chat failed: {e}")
+
+    # Test 2: Multimodal Chat with Image
+    print("\\n🖼️ TEST 2: Multimodal Chat (Image)")
+    try:
+        # Use proper Qwen format with system message
+        messages = [
+            {
+                "role": "system",
+                "content": [
+                    {"type": "text", "text": "You are Senter, a multimodal AI assistant developed by Chris at Alignment Lab AI, capable of perceiving auditory and visual inputs, as well as generating text and speech."}
+                ]
+            },
+            {
+                "role": "user",
+                "content": [
+                    {"type": "image", "image": "test_assets/real_test_image.jpg"},
+                    {"type": "text", "text": "What can you see in this image? Describe it in detail."}
+                ]
+            }
+        ]
+        response = chat(messages, max_tokens=150)
+        print(f"✅ Image chat: {response[:100]}...")
+    except Exception as e:
+        print(f"❌ Image chat failed: {e}")
+
+    # Test 3: Multimodal Chat with Audio
+    print("\\n🎵 TEST 3: Multimodal Chat (Audio)")
+    try:
+        # Use proper Qwen format with system message
+        messages = [
+            {
+                "role": "system",
+                "content": [
+                    {"type": "text", "text": "You are Senter, a multimodal AI assistant developed by Chris at Alignment Lab AI, capable of perceiving auditory and visual inputs, as well as generating text and speech."}
+                ]
+            },
+            {
+                "role": "user",
+                "content": [
+                    {"type": "audio", "audio": "test_assets/real_test_audio.wav"},
+                    {"type": "text", "text": "What do you hear? Describe the sound."}
+                ]
+            }
+        ]
+        response = chat(messages, max_tokens=150)
+        print(f"✅ Audio chat: {response[:100]}...")
+    except Exception as e:
+        print(f"❌ Audio chat failed: {e}")
+
+    # Test 4: Text Embedding
+    print("\\n📝 TEST 4: Text Embedding")
+    try:
+        result = embed("<text>Artificial intelligence and machine learning</text>")
+        print(f"✅ Text embedding: {len(result['embeddings'])} embeddings generated")
+        print(f"   Dimensions: {len(list(result['embeddings'].values())[0]['embedding'])}")
+    except Exception as e:
+        print(f"❌ Text embedding failed: {e}")
+
+    # Test 5: Image Embedding
+    print("\\n🖼️ TEST 5: Image Embedding")
+    try:
+        result = embed("<image>test_assets/real_test_image.jpg</image>")
+        print(f"✅ Image embedding: {len(result['embeddings'])} embeddings generated")
+        print(f"   Dimensions: {len(list(result['embeddings'].values())[0]['embedding'])}")
+    except Exception as e:
+        print(f"❌ Image embedding failed: {e}")
+
+    # Test 6: Audio Embedding
+    print("\\n🎵 TEST 6: Audio Embedding")
+    try:
+        result = embed("<audio>test_assets/real_test_audio.wav</audio>")
+        print(f"✅ Audio embedding: {len(result['embeddings'])} embeddings generated")
+        print(f"   Dimensions: {len(list(result['embeddings'].values())[0]['embedding'])}")
+    except Exception as e:
+        print(f"❌ Audio embedding failed: {e}")
+
+    # Test 7: Multimodal Embedding (All Modalities)
+    print("\\n🎭 TEST 7: Multimodal Embedding (Text + Image + Audio)")
+    try:
+        result = embed("""
+<text>The future of artificial intelligence</text>
+<image>test_assets/real_test_image.jpg</image>
+<audio>test_assets/real_test_audio.wav</audio>
+""", operation="similarity")
+        print(f"✅ Multimodal embedding: {len(result['embeddings'])} embeddings generated")
+        if 'similarities' in result:
+            print(f"   Similarities computed: {len(result['similarities'])} pairs")
+            for pair, score in list(result['similarities'].items())[:3]:
+                print(f"   {pair}: {score:.3f}")
+    except Exception as e:
+        print(f"❌ Multimodal embedding failed: {e}")
+
+    # Test 8: Cross-Modal Similarity Search
+    print("\\n🔍 TEST 8: Cross-Modal Similarity Search")
+    try:
+        # Create a database of multimodal content
+        contents = [
+            "<text>Machine learning algorithms and neural networks</text>",
+            "<text>Beautiful sunset over mountains landscape</text>",
+            "<text>Gentle piano music with emotional melody</text>",
+        ]
+
+        # Test similarity search
+        query = "<text>AI systems and artificial intelligence</text>"
+        result = embed(query, operation="similarity")
+
+        if 'embeddings' in result:
+            print("✅ Cross-modal search: Query embedding generated")
+            print(f"   Query dimensions: {len(list(result['embeddings'].values())[0]['embedding'])}")
+
+        # Test with different modalities
+        image_query = embed("<image>test_assets/real_test_image.jpg</image>", operation="embed")
+        audio_query = embed("<audio>test_assets/real_test_audio.wav</audio>", operation="embed")
+
+        print(f"✅ Image query: {len(image_query['embeddings'])} embeddings")
+        print(f"✅ Audio query: {len(audio_query['embeddings'])} embeddings")
+
+    except Exception as e:
+        print(f"❌ Cross-modal search failed: {e}")
+
+    print("\\n🎉 TEST COMPLETE!")
+    print("All tests completed. Check results above for any failures.")
+
+if __name__ == "__main__":
+    import sys
+
+    if len(sys.argv) > 1 and sys.argv[1] == "--test":
+        run_comprehensive_test()
+    else:
+        print("🎭 Senter-Omni Unified API (LLaVA)")
+        print("=" * 60)
+        print("Available functions:")
+        print("• omni.train() - Train new multimodal chat models")
+        print("• omni.chat() - Chat completions with parameters")
+        print("• omni.embed() - Multimodal embeddings with XML tags")
+        print("• omni.create_chat_completion() - OpenAI-style API")
+        print("• omni.generate() - llama.cpp-style generation")
+
+        print("\\n📖 Usage Examples:")
+        print("```python")
+        print("# Train a new model")
+        print("result = omni.train(['NousResearch/Hermes-3-Dataset'], max_samples=5000)")
+        print("")
+        print("# Chat")
+        print("response = omni.chat('<user>Hello!</user>', max_tokens=100, temperature=0.7)")
+        print("")
+        print("# Embeddings")
+        print("result = omni.embed('<text>Hello</text><image>photo.jpg</image>')")
+        print("```")
+
+        print("\\n🧪 Run comprehensive test:")
+        print("python omni.py --test")

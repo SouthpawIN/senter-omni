@@ -23,6 +23,11 @@ wheels/
 
 # Models (too large for git)
 models/
+senter_omni_128k/
+*.safetensors
+*.pt
+*.pth
+*.bin
 
 # IDE files
 .vscode/

@@ -327,7 +327,6 @@ This project uses:
 
 *Built with ❤️ by Chris at Alignment Lab AI*
 Donations:
+![Senter Banner](https://img.shields.io/badge/Ready%20to%20Donate%3F-To Keep%Skynet At Bay20-gold?style=for-the-badge&logo=play&logoColor=teal)
 https://www.paypal.me/Sellgames1
-![Senter Banner](https://img.shields.io/badge/Ready%20to%20Explore%3F-Run%20senter_omni_demo.py-gold?style=for-the-badge&logo=play&logoColor=teal)
-
 </div>

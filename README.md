@@ -1,6 +1,6 @@
 <div align="center">
 
-![Senter-Omni Animated Banner](senter-animated-banner.gif)
+![Senter-Omni Fixed Banner](senter-fixed-banner.gif)
 
 </div>
 

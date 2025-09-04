@@ -325,11 +325,3 @@ Donations:
 
 https://www.paypal.me/Sellgames1l
 </div>
-<div align="center">
-
-**🎭 EXPERIENCE THE FUTURE OF MULTIMODAL AI WITH SENTER-OMNI**
-
-*Built with ❤️ by Chris at Alignment Lab AI*
-Donations:
-https://www.paypal.me/Sellgames1l
-</div>

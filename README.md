@@ -1,8 +1,4 @@
-<div align="center">
-
 ![Senter-Omni Fixed Banner](senter-fixed-banner.gif)
-
-</div>
 
 ## 🌟 **Why Senter-Omni?**
 

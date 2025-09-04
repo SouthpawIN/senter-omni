@@ -2,7 +2,15 @@
 
 <div align="center">
 
-<img src="assets/senter-banner-simple.svg" alt="Senter-Omni Banner" width="100%">
+# 🎭 SENTER-OMNI
+
+**THE WORLD'S FIRST TRULY OMNIMODAL AI ASSISTANT**
+
+*Built by Chris at Alignment Lab AI*
+
+![4B Parameters](https://img.shields.io/badge/4B%20Parameters-Gold?style=for-the-badge&color=gold)
+![128K Context](https://img.shields.io/badge/128K%20Context-Teal?style=for-the-badge&color=teal)
+![Apache 2.0](https://img.shields.io/badge/Apache%202.0-Green?style=for-the-badge&color=green)
 
 </div>
 
@@ -206,6 +214,10 @@ pip install -r requirements.txt
 
 ### **3. Download Model**
 The quantized model (3.5GB) is hosted on Hugging Face due to GitHub's 100MB file limit:
+
+**🤗 Model Hosting:**
+- **Model**: https://huggingface.co/SouthpawIN/senter-omni-model
+- **Dataset**: https://huggingface.co/SouthpawIN/senter-omni-data
 
 ```bash
 # Option 1: Download from Hugging Face (Recommended)

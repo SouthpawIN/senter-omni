@@ -2,15 +2,7 @@
 
 <div align="center">
 
-# 🎭 SENTER-OMNI
-
-**THE WORLD'S FIRST TRULY OMNIMODAL AI ASSISTANT**
-
-*Built by Chris at Alignment Lab AI*
-
-![4B Parameters](https://img.shields.io/badge/4B%20Parameters-Gold?style=for-the-badge&color=gold)
-![128K Context](https://img.shields.io/badge/128K%20Context-Teal?style=for-the-badge&color=teal)
-![Apache 2.0](https://img.shields.io/badge/Apache%202.0-Green?style=for-the-badge&color=green)
+![Senter-Omni Banner](assets/senter-banner.png)
 
 </div>
 

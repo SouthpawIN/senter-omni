@@ -8,13 +8,11 @@
 
 **🎯 ONE MODEL, ALL MODALITIES** - Unlike pipeline approaches, Senter-Omni is a single 4B parameter model that understands and reasons across text, images, audio, and video simultaneously.
 
-**⚡ TRUE STREAMING** - Experience real-time token generation with measurable time-to-first-token performance (~0.234s).
-
 **🔓 OPEN & UNCENSORED** - Apache 2.0 licensed with unrestricted responses for maximum utility.
 
-**🧠 128K CONTEXT** - Extended RoPE scaling for handling massive documents and conversations.
+**128K CONTEXT** - Extended RoPE scaling for handling massive documents and conversations.
 
-**💾 MEMORY EFFICIENT** - 4-bit quantized model that fits on consumer GPUs while maintaining full multimodal capabilities.
+**MEMORY EFFICIENT** - 4-bit quantized model that fits on consumer GPUs while maintaining full multimodal capabilities.
 
 ---
 
@@ -42,7 +40,7 @@ from omni import OmniClient
 # Initialize Senter-Omni
 client = OmniClient()
 
-# TRUE streaming chat
+# Streaming chat
 response = client.chat([
     {"role": "user", "content": "Hello Senter!"}
 ], stream=True)
@@ -85,19 +83,6 @@ embedding = client.embed("any content", modality="auto")
 - **Unified Understanding**: Connecting information across modalities
 - **Contextual Analysis**: Using multiple inputs for better reasoning
 - **Creative Synthesis**: Combining visual, audio, and text for rich responses
-
----
-
-## 📊 **Performance Metrics**
-
-### **Streaming Performance**
-```
-Time to First Token: ~0.234 seconds
-Text Generation:     2-5 seconds
-Image Analysis:      3-6 seconds  
-Audio Processing:    4-8 seconds
-Multimodal Chat:     5-10 seconds
-```
 
 ### **Model Specifications**
 - **Parameters**: 4B (quantized to 4-bit)
@@ -186,7 +171,6 @@ audio_emb = client.embed("nature_sounds.wav", modality="audio")
 
 ### **Key Features**
 - **XML Tag Support**: `<think>`, `<notepad>`, `<system>`, `<user>`, `<assistant>`
-- **Senter Identity**: Trained to identify as "Senter by Chris at Alignment Lab AI"
 - **Uncensored Responses**: No content restrictions
 - **Function Calling**: Tool integration capabilities
 - **Memory Efficient**: Single model for chat and embeddings
@@ -219,20 +203,18 @@ git lfs install
 git clone https://huggingface.co/SouthpawIN/senter-omni-model
 cp -r senter-omni-model/* ./senter_omni_128k/
 
+<<<<<<< HEAD
 # Option 2: Use base model (will download automatically)
 # The system will fall back to unsloth/Qwen2.5-Omni-3B
 
 # Option 3: Manual download
 # Model: https://huggingface.co/SouthpawIN/senter-omni-model
 # Dataset: https://huggingface.co/datasets/SouthpawIN/senter-omni-data
+=======
+# Option 2: Manual download
+# Download from: https://huggingface.co/SouthpawIN/senter-omni-model
+>>>>>>> ef9c90b68b12894eb877dacd7f741ec1228cffb6
 ```
-
-### **4. Run Demo**
-```bash
-python senter_omni_demo.py
-```
-
----
 
 ## 🎮 **Interactive Demo**
 
@@ -309,68 +291,11 @@ context = client.retrieve_context("nature scenes")
 
 ---
 
-
----
-
-## 📈 **Performance Benchmarks**
-
-### **Streaming Metrics**
-| Task | Time to First Token | Total Time | Tokens/sec |
-|------|-------------------|------------|------------|
-| Text Chat | 0.234s | 2.5s | 15.2 |
-| Image Analysis | 0.234s | 3.2s | 12.8 |
-| Audio Processing | 0.234s | 4.1s | 9.7 |
-| Multimodal Chat | 0.234s | 5.5s | 8.3 |
-| Mathematical Reasoning | 0.234s | 3.8s | 11.4 |
-
 ### **Memory Usage**
 - **Model Loading**: ~8GB VRAM
 - **Inference**: ~10GB VRAM peak
 - **Embeddings**: Shared model (no additional memory)
 - **Context (128K)**: ~2GB additional for full context
-
-### **Accuracy Examples**
-- **Geometric Recognition**: 95%+ accuracy on basic shapes
-- **Audio Classification**: 90%+ on common sounds
-- **Mathematical Problems**: 85%+ on arithmetic and algebra
-- **Creative Writing**: High coherence and creativity scores
-
----
-
-## 🔮 **Roadmap**
-
-### **Current (v0.1.0)**
-- ✅ TRUE streaming output with timing
-- ✅ Multimodal chat (text, image, audio)
-- ✅ Cross-modal embeddings
-- ✅ 128K context with RoPE scaling
-- ✅ Production-ready API
-
-### **Near Future (v0.2.0)**
-- [ ] Video processing capabilities
-- [ ] Speech synthesis output
-- [ ] Advanced function calling
-- [ ] Web interface
-- [ ] API server deployment
-
-### **Future (v0.3.0)**
-- [ ] Real-time multimodal conversations
-- [ ] Custom model fine-tuning tools
-- [ ] Enterprise deployment options
-- [ ] Mobile app integration
-- [ ] Advanced reasoning capabilities
-
----
-
-## 🤝 **Contributing**
-
-We welcome contributions! Areas of interest:
-
-- **Model Optimization**: Memory usage, inference speed
-- **New Modalities**: Video, 3D, sensor data
-- **Training Data**: High-quality multimodal datasets
-- **Applications**: Creative tools, educational platforms
-- **Documentation**: Examples, tutorials, guides
 
 ### **Development Setup**
 ```bash
@@ -396,18 +321,11 @@ This project uses:
 ## 🙏 **Acknowledgments**
 
 - **Alibaba Cloud** for Qwen2.5-Omni architecture
+- **Nous Research** for Hermes dataset and inspiration
 - **Alignment Lab AI** for development and training
 - **Unsloth** for efficient training framework
 - **HuggingFace** for model hosting and tools
 - **Open Source Community** for datasets and tools
-
----
-
-## 📞 **Support & Community**
-
-- **GitHub Issues**: [Report bugs and request features](https://github.com/SouthpawIN/senter-omni/issues)
-- **Discussions**: [Community discussions](https://github.com/SouthpawIN/senter-omni/discussions)
-- **Documentation**: [Full documentation](https://github.com/SouthpawIN/senter-omni/wiki)
 
 ---
 
@@ -416,7 +334,6 @@ This project uses:
 **🎭 EXPERIENCE THE FUTURE OF MULTIMODAL AI WITH SENTER-OMNI**
 
 *Built with ❤️ by Chris at Alignment Lab AI*
-
-![Senter Banner](https://img.shields.io/badge/Ready%20to%20Explore%3F-Run%20senter_omni_demo.py-gold?style=for-the-badge&logo=play&logoColor=teal)
-
+Donations:
+https://www.paypal.me/Sellgames1l
 </div>

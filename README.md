@@ -1,22 +1,17 @@
 ![Senter-Omni Fixed Banner](senter-fixed-banner.gif)
 
-## 🌟 **Why Senter-Omni?**
-
-**🎯 ONE MODEL, ALL MODALITIES** - Unlike pipeline approaches, Senter-Omni is a single 4B parameter model that understands and reasons across text, images, audio, and video simultaneously.
+**🎯 ONE MODEL, ALL MODALITIES, CHAT & EMBED** - Unlike pipeline approaches, Senter-Omni is a single 4B parameter model that truly understands and reasons across text, images, audio, and video simultaneously.
 
 **🔓 OPEN & UNCENSORED** - Apache 2.0 licensed with unrestricted responses for maximum utility.
 
-**128K CONTEXT** - Extended RoPE scaling for handling massive documents and conversations.
+**🧠 128K CONTEXT** - Extended RoPE scaling for handling massive documents and conversations.
 
-**MEMORY EFFICIENT** - 4-bit quantized model that fits on consumer GPUs while maintaining full multimodal capabilities.
+**💾 MEMORY EFFICIENT** - 4-bit quantized model that fits on consumer GPUs while maintaining full multimodal capabilities.
 
 ---
+</div>
 
 ## 🚀 **Quick Start**
-
-### **🤗 Hugging Face Repositories**
-- **Model**: https://huggingface.co/SouthpawIN/senter-omni-model
-- **Dataset**: https://huggingface.co/datasets/SouthpawIN/senter-omni-data
 
 ### **Installation**
 ```bash
@@ -199,17 +194,8 @@ git lfs install
 git clone https://huggingface.co/SouthpawIN/senter-omni-model
 cp -r senter-omni-model/* ./senter_omni_128k/
 
-<<<<<<< HEAD
-# Option 2: Use base model (will download automatically)
-# The system will fall back to unsloth/Qwen2.5-Omni-3B
-
-# Option 3: Manual download
-# Model: https://huggingface.co/SouthpawIN/senter-omni-model
-# Dataset: https://huggingface.co/datasets/SouthpawIN/senter-omni-data
-=======
 # Option 2: Manual download
 # Download from: https://huggingface.co/SouthpawIN/senter-omni-model
->>>>>>> ef9c90b68b12894eb877dacd7f741ec1228cffb6
 ```
 
 ## 🎮 **Interactive Demo**
@@ -300,7 +286,6 @@ cd senter-omni
 pip install -r requirements.txt
 python senter_omni_demo.py  # Test installation
 ```
-
 ---
 
 ## 📄 **License**
@@ -322,9 +307,18 @@ This project uses:
 - **Unsloth** for efficient training framework
 - **HuggingFace** for model hosting and tools
 - **Open Source Community** for datasets and tools
-
 ---
 
+<div align="center">
+
+**🎭 EXPERIENCE THE FUTURE OF MULTIMODAL AI WITH SENTER-OMNI**
+
+*Built with ❤️ by sovthpaw at Alignment Lab AI*
+
+Donations:
+
+https://www.paypal.me/Sellgames1l
+</div>
 <div align="center">
 
 **🎭 EXPERIENCE THE FUTURE OF MULTIMODAL AI WITH SENTER-OMNI**

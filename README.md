@@ -3,13 +3,13 @@
 ![Senter-Omni Banner](assets/senter-banner.png)
 
 </div>
-** 🤘🤖 ONE MODEL, ALL MODALITIES** - Unlike pipeline approaches, Senter-Omni is a single 4B parameter model that truly understands and reasons across text, images, audio, and video simultaneously.
+**🤘🤖 ONE MODEL, ALL MODALITIES** - Unlike pipeline approaches, Senter-Omni is a single 4B parameter model that truly understands and reasons across text, images, audio, and video simultaneously.
 
-** OPEN & UNCENSORED** - Apache 2.0 licensed with unrestricted responses for maximum utility.
+**OPEN & UNCENSORED** - Apache 2.0 licensed with unrestricted responses for maximum utility.
 
-** 128K CONTEXT** - Extended RoPE scaling for handling massive documents and conversations.
+**128K CONTEXT** - Extended RoPE scaling for handling massive documents and conversations.
 
-** MEMORY EFFICIENT** - 4-bit quantized model that fits on consumer GPUs while maintaining full multimodal capabilities.
+**MEMORY EFFICIENT** - 4-bit quantized model that fits on consumer GPUs while maintaining full multimodal capabilities.
 
 ---
 

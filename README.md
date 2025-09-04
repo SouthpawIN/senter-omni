@@ -6,22 +6,6 @@
 
 </div>
 
-<div align="center">
-
-# 🎭 SENTER-OMNI
-
-**THE WORLD'S FIRST TRULY OMNIMODAL AI ASSISTANT**  
-**WITH TRUE STREAMING OUTPUT AND CROSS-MODAL EMBEDDINGS**
-
-*Built by Chris at Alignment Lab AI*
-
-![Senter Logo](https://img.shields.io/badge/Senter-Omni-4B%20Parameters-gold?style=for-the-badge&logo=circle&logoColor=teal)
-![License](https://img.shields.io/badge/License-Apache%202.0-green?style=for-the-badge)
-![Context](https://img.shields.io/badge/Context%20Length-128K%20Tokens-blue?style=for-the-badge)
-![Multimodal](https://img.shields.io/badge/Multimodal-Text%20%7C%20Image%20%7C%20Audio%20%7C%20Video-purple?style=for-the-badge)
-
-</div>
-
 ## 🌟 **Why Senter-Omni?**
 
 **🎯 ONE MODEL, ALL MODALITIES** - Unlike pipeline approaches, Senter-Omni is a single 4B parameter model that truly understands and reasons across text, images, audio, and video simultaneously.
@@ -421,8 +405,6 @@ This project uses:
 ---
 
 <div align="center">
-
-<img src="assets/senter-social-card.svg" alt="Senter-Omni Social Card" width="100%">
 
 **🎭 EXPERIENCE THE FUTURE OF MULTIMODAL AI WITH SENTER-OMNI**
 

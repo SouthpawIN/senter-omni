@@ -1,5 +1,3 @@
-# 🎭 Senter-Omni
-
 <div align="center">
 
 ![Senter-Omni Banner](assets/senter-banner.png)

@@ -8,7 +8,7 @@
 
 ## 🌟 **Why Senter-Omni?**
 
-**🎯 ONE MODEL, ALL MODALITIES** - Unlike pipeline approaches, Senter-Omni is a single 4B parameter model that truly understands and reasons across text, images, audio, and video simultaneously.
+**🎯 ONE MODEL, ALL MODALITIES** - Unlike pipeline approaches, Senter-Omni is a single 4B parameter model that understands and reasons across text, images, audio, and video simultaneously.
 
 **⚡ TRUE STREAMING** - Experience real-time token generation with measurable time-to-first-token performance (~0.234s).
 
@@ -21,6 +21,10 @@
 ---
 
 ## 🚀 **Quick Start**
+
+### **🤗 Hugging Face Repositories**
+- **Model**: https://huggingface.co/SouthpawIN/senter-omni-model
+- **Dataset**: https://huggingface.co/datasets/SouthpawIN/senter-omni-data
 
 ### **Installation**
 ```bash
@@ -209,7 +213,7 @@ The quantized model (3.5GB) is hosted on Hugging Face due to GitHub's 100MB file
 
 **🤗 Model Hosting:**
 - **Model**: https://huggingface.co/SouthpawIN/senter-omni-model
-- **Dataset**: https://huggingface.co/SouthpawIN/senter-omni-data
+- **Dataset**: https://huggingface.co/datasets/SouthpawIN/senter-omni-data
 
 ```bash
 # Option 1: Download from Hugging Face (Recommended)
@@ -221,7 +225,8 @@ cp -r senter-omni-model/* ./senter_omni_128k/
 # The system will fall back to unsloth/Qwen2.5-Omni-3B
 
 # Option 3: Manual download
-# Download from: https://huggingface.co/SouthpawIN/senter-omni-model
+# Model: https://huggingface.co/SouthpawIN/senter-omni-model
+# Dataset: https://huggingface.co/datasets/SouthpawIN/senter-omni-data
 ```
 
 ### **4. Run Demo**

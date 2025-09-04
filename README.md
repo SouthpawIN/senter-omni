@@ -281,14 +281,6 @@ context = client.retrieve_context("nature scenes")
 - **Embeddings**: Shared model (no additional memory)
 - **Context (128K)**: ~2GB additional for full context
 
-### **Accuracy Examples**
-- **Geometric Recognition**: 95%+ accuracy on basic shapes
-- **Audio Classification**: 90%+ on common sounds
-- **Mathematical Problems**: 85%+ on arithmetic and algebra
-- **Creative Writing**: High coherence and creativity scores
-
----
-
 ### **Development Setup**
 ```bash
 git clone https://github.com/SouthpawIN/senter-omni.git

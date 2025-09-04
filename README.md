@@ -1,8 +1,6 @@
-# 🎭 Senter-Omni
-
 <div align="center">
 
-![Senter-Omni Banner](assets/senter-banner.png)
+![Senter-Omni Animated Banner](senter-animated-banner.mp4)
 
 </div>
 

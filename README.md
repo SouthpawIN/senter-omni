@@ -1,4 +1,10 @@
+<div align="center">
+
 ![Senter-Omni Fixed Banner](senter-fixed-banner.gif)
+
+🤘🤖
+
+</div>
 
 **🎯 ONE MODEL, ALL MODALITIES, CHAT & EMBED** - Unlike pipeline approaches, Senter-Omni is a single 4B parameter model that truly understands and reasons across text, images, audio, and video simultaneously.
 
